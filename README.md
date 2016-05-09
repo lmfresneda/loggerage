@@ -1,0 +1,1 @@
+##LogStorage.js es un logger para Javascript que guarda el registro directamente en el localStorage. Tiene la capacidad de crear un archivo al solicitarlo por consola.

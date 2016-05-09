@@ -1,0 +1,30 @@
+{
+  "name": "LogStorage.js",
+  "version": "0.2.1",
+  "description": "LogStorage.js es un logger para Javascript que guarda el registro directamente en el localStorage. Tiene la capacidad de crear un archivo al solicitarlo por consola.",
+  "author": "Luis M. Fresneda <lmiguelfresneda@gmail.com>",
+  "main": "./build/LogStorage.js",
+  "keywords": [
+    "log",
+    "logger",
+    "storage",
+    "localStorage",
+    "js",
+    "javascript"
+  ],
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lmfresneda/LogStorage.js.git"
+  },
+  "typings": "./build/LogStorage.d.ts",
+  "license": "MIT",
+  "homepage": "https://github.com/lmfresneda/LogStorage.js",
+  "dependencies": {},
+  "devDependencies": {
+    "expect.js": "^0.3.1",
+    "mocha": "^2.4.5"
+  }
+}
