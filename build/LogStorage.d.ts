@@ -9,7 +9,12 @@ declare class LogStorage {
      * @param defaultLogLevel   Default log level
      * @param version           Version for this App
      */
-    constructor(app: string, defaultLogLevel?: LogStorageLevel, version?: number);
+    constructor(app: string, defaultLogLevel?: LogStorageLevel, version?: number);/**
+    * Set localStorage for test for example
+    * @param otherStorage
+    * @returns {LogStorage}
+    */
+    setStorage(otherStorage:any):LogStorage;
     /**
      * Return de app version
      * @returns {number}
