@@ -1,5 +1,5 @@
-describe("LogStorage", function() {
-    var logger = new LogStorage(Date.now());
+describe("LogStorageJS", function() {
+    var logger = new LogStorageJS(Date.now());
     var i = 0;
 
     //polyfill for localStorage
@@ -23,7 +23,7 @@ describe("LogStorage", function() {
     })());
 
     beforeEach(function() {
-        logger = new LogStorage(Date.now() + i);
+        logger = new LogStorageJS(Date.now() + i);
         i += 1;
     });
 
@@ -35,18 +35,18 @@ describe("LogStorage", function() {
         it("app es igual a (Date.now() + i)", function() {
             var app = Date.now() + i;
             i += 1;
-            logger = new LogStorage(app, LogStorageLevel.INFO);
+            logger = new LogStorageJS(app, LogStorageJSLevel.INFO);
             expect(logger.getApp()).toEqual(app);
         });
 
         it("log level es igual a INFO", function() {
-            logger = new LogStorage(Date.now() + i, LogStorageLevel.INFO);
+            logger = new LogStorageJS(Date.now() + i, LogStorageJSLevel.INFO);
             i += 1;
             expect(logger.getDefaultLogLevel()).toEqual("INFO");
         });
 
         it("version es igual a 2", function() {
-            logger = new LogStorage(Date.now() + i, LogStorageLevel.INFO, 2);
+            logger = new LogStorageJS(Date.now() + i, LogStorageJSLevel.INFO, 2);
             i += 1;
             expect(logger.getVersion()).toEqual(2);
         });
@@ -157,7 +157,7 @@ describe("LogStorage", function() {
                 delete window.localStorage;
             }
             expect(function() {
-                new LogStorage("ThrowError");
+                new LogStorageJS("ThrowError");
             }).toThrowError("[localStorage] not exist in your app");
             window.localStorage = _localStorage;
         });

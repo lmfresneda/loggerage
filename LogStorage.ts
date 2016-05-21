@@ -1,10 +1,10 @@
 /**
- * LogStorage.js v0.2.1
+ * LogStorage.js v0.2.2
  * (c) Luis M. Fresneda
  */
 
 
-class LogStorageObject {
+class LogStorageJSObject {
     date:string;
     level:string;
     message:string;
@@ -16,24 +16,24 @@ class LogStorageObject {
     }
 }
 
-enum LogStorageLevel {
+enum LogStorageJSLevel {
     DEBUG,
     TRACE,
-    SUCCESS,
+    SUCCESS, 
     INFO,
     WARN,
     ERROR,
     FAILURE
 }
 
-export class LogStorage {
+export class LogStorageJS {
     /**
-     * Constructor for LogStorage
+     * Constructor for LogStorageJS
      * @param app               Name for App in localStorage
      * @param defaultLogLevel   Default log level
      * @param version           Version for this App
      */
-    constructor(app:string, defaultLogLevel:LogStorageLevel = LogStorageLevel.DEBUG, version:number = 1){
+    constructor(app:string, defaultLogLevel:LogStorageJSLevel = LogStorageJSLevel.DEBUG, version:number = 1){
         try {
             if(!window.localStorage){
                 throw new Error(`[localStorage] not exist in your app`);
@@ -51,9 +51,9 @@ export class LogStorage {
     /**
      * Set localStorage for test for example
      * @param otherStorage
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    setStorage(otherStorage:any):LogStorage {
+    setStorage(otherStorage:any):LogStorageJS {
         this.__localStorage__ = otherStorage;
         return this;
     }
@@ -73,9 +73,9 @@ export class LogStorage {
     /**
      * Set the default log level
      * @param defaultLogLevel
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    setDefaultLogLevel(defaultLogLevel:LogStorageLevel):LogStorage {
+    setDefaultLogLevel(defaultLogLevel:LogStorageJSLevel):LogStorageJS {
         this.__defaultLogLevel__ = defaultLogLevel;
         return this;
     }
@@ -85,23 +85,23 @@ export class LogStorage {
      * @returns {string}
      */
     getDefaultLogLevel():string {
-        return LogStorageLevel[this.__defaultLogLevel__];
+        return LogStorageJSLevel[this.__defaultLogLevel__];
     }
 
     /**
      * Get the actual log
-     * @returns {Array<LogStorageObject>}
+     * @returns {Array<LogStorageJSObject>}
      */
-    getLog():Array<LogStorageObject>{
-        let logs:Array<LogStorageObject> = JSON.parse(this.__localStorage__.getItem(this.__app__) || "[]");
+    getLog():Array<LogStorageJSObject>{
+        let logs:Array<LogStorageJSObject> = JSON.parse(this.__localStorage__.getItem(this.__app__) || "[]");
         return logs;
     }
 
     /**
      * Clear all the log
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    clearLog():LogStorage {
+    clearLog():LogStorageJS {
         this.__localStorage__.setItem(this.getApp(), "[]");
         return this;
     }
@@ -109,23 +109,23 @@ export class LogStorage {
     /**
      * Download the log in a file
      * @param type File type (csv || txt)
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    downloadFileLog(type:string = "txt"):LogStorage{
+    downloadFileLog(type:string = "txt"):LogStorageJS{
         if(Blob && (window.URL || window["webkitURL"])) {
             console.info("The file is building now");
             let contenido = "";
             switch (type.toLowerCase()) {
                 case "txt":
-                    contenido = LogStorage.__buildTxtContent__(this.getLog());
+                    contenido = LogStorageJS.__buildTxtContent__(this.getLog());
                     break;
                 case "csv":
-                    contenido = LogStorage.__buildCsvContent__(this.getLog());
+                    contenido = LogStorageJS.__buildCsvContent__(this.getLog());
                     break;
             }
-            let blob = LogStorage.__getBlob__(contenido, type);
+            let blob = LogStorageJS.__getBlob__(contenido, type);
             let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-            LogStorage.__downloadBlob__(blob, nameFile);
+            LogStorageJS.__downloadBlob__(blob, nameFile);
         }else {
             throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
         }
@@ -137,14 +137,14 @@ export class LogStorage {
      * @param logLevel
      * @param message
      * @param stacktrace [optional]
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    log(logLevel:LogStorageLevel = this.__defaultLogLevel__, message:string, stacktrace?:string):LogStorage {
+    log(logLevel:LogStorageJSLevel = this.__defaultLogLevel__, message:string, stacktrace?:string):LogStorageJS {
         if(stacktrace){
             message += `\n[Stack Trace: ${stacktrace}]`;
         }
-        let logObj:LogStorageObject = this.__makeObjectToLog__(logLevel, message);
-        let logs:Array<LogStorageObject> = this.getLog();
+        let logObj:LogStorageJSObject = this.__makeObjectToLog__(logLevel, message);
+        let logs:Array<LogStorageJSObject> = this.getLog();
         logs.push(logObj);
         this.__localStorage__.setItem(this.__app__, JSON.stringify(logs));
         return this;
@@ -153,60 +153,60 @@ export class LogStorage {
     /**
      * Log an info message
      * @param message
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    info(message:string):LogStorage {
-        return this.log(LogStorageLevel.INFO, message);
+    info(message:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.INFO, message);
     }
     /**
      * Log a debug message
      * @param message
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    debug(message:string):LogStorage {
-        return this.log(LogStorageLevel.DEBUG, message);
+    debug(message:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.DEBUG, message);
     }
     /**
      * Log a trace message
      * @param message
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    trace(message:string):LogStorage {
-        return this.log(LogStorageLevel.TRACE, message);
+    trace(message:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.TRACE, message);
     }
     /**
      * Log a success message
      * @param message
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    success(message:string):LogStorage {
-        return this.log(LogStorageLevel.SUCCESS, message);
+    success(message:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.SUCCESS, message);
     }
     /**
      * Log a warn message
      * @param message
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    warn(message:string):LogStorage {
-        return this.log(LogStorageLevel.WARN, message);
+    warn(message:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.WARN, message);
     }
     /**
      * Log an error message
      * @param message
      * @param stacktrace
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    error(message:string, stacktrace:string):LogStorage {
-        return this.log(LogStorageLevel.ERROR, message, stacktrace);
+    error(message:string, stacktrace:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.ERROR, message, stacktrace);
     }
     /**
      * Log a failure message
      * @param message
      * @param stacktrace
-     * @returns {LogStorage}
+     * @returns {LogStorageJS}
      */
-    failure(message:string, stacktrace:string):LogStorage {
-        return this.log(LogStorageLevel.FAILURE, message, stacktrace);
+    failure(message:string, stacktrace:string):LogStorageJS {
+        return this.log(LogStorageJSLevel.FAILURE, message, stacktrace);
     }
 
     //                           //
@@ -225,16 +225,16 @@ export class LogStorage {
     /**
      * Default log level
      */
-    private __defaultLogLevel__:LogStorageLevel;
+    private __defaultLogLevel__:LogStorageJSLevel;
     /**
      * Make an object for log
      * @param logLevel
      * @param message
      * @private
-     * @returns {LogStorageObject}
+     * @returns {LogStorageJSObject}
      */
-    private __makeObjectToLog__(logLevel:LogStorageLevel = this.__defaultLogLevel__, message:string):LogStorageObject {
-        let logObj = new LogStorageObject(LogStorageLevel[logLevel], message);
+    private __makeObjectToLog__(logLevel:LogStorageJSLevel = this.__defaultLogLevel__, message:string):LogStorageJSObject {
+        let logObj = new LogStorageJSObject(LogStorageJSLevel[logLevel], message);
         return logObj;
     }
     /**
