@@ -1,36 +1,26 @@
 var expect = require('expect.js');
-var LogStorage = require("../build/LogStorage").LogStorage;
+var localStorage = require('localStorage');
+var LogStorageJS = require("../build/LogStorage").LogStorageJS;
 
-//polyfill for localStorage
-var localStorage;
-(function () {
-    localStorage = {
-        _data       : {},
-        setItem     : function(id, val) { return this._data[id] = String(val); },
-        getItem     : function(id) { return this._data.hasOwnProperty(id) ? this._data[id] : undefined; },
-        removeItem  : function(id) { return delete this._data[id]; },
-        clear       : function() { return this._data = {}; }
-    };
-})();
-//polyfill for LogStorageLevel
+//polyfill for LogStorageJSLevel
 var LogStorageLevel;
-(function (LogStorageLevel) {
-    LogStorageLevel[LogStorageLevel["DEBUG"] = 0] = "DEBUG";
-    LogStorageLevel[LogStorageLevel["TRACE"] = 1] = "TRACE";
-    LogStorageLevel[LogStorageLevel["SUCCESS"] = 2] = "SUCCESS";
-    LogStorageLevel[LogStorageLevel["INFO"] = 3] = "INFO";
-    LogStorageLevel[LogStorageLevel["WARN"] = 4] = "WARN";
-    LogStorageLevel[LogStorageLevel["ERROR"] = 5] = "ERROR";
-    LogStorageLevel[LogStorageLevel["FAILURE"] = 6] = "FAILURE";
+(function (LogStorageJSLevel) {
+    LogStorageJSLevel[LogStorageJSLevel["DEBUG"] = 0] = "DEBUG";
+    LogStorageJSLevel[LogStorageJSLevel["TRACE"] = 1] = "TRACE";
+    LogStorageJSLevel[LogStorageJSLevel["SUCCESS"] = 2] = "SUCCESS";
+    LogStorageJSLevel[LogStorageJSLevel["INFO"] = 3] = "INFO";
+    LogStorageJSLevel[LogStorageJSLevel["WARN"] = 4] = "WARN";
+    LogStorageJSLevel[LogStorageJSLevel["ERROR"] = 5] = "ERROR";
+    LogStorageJSLevel[LogStorageJSLevel["FAILURE"] = 6] = "FAILURE";
 })(LogStorageLevel || (LogStorageLevel = {}));
 
-describe("LogStorage", function() {
-    var logger = new LogStorage(Date.now());
+describe("LogStorageJS", function() {
+    var logger = new LogStorageJS(Date.now());
     logger.setStorage(localStorage);
     var i = 0;
 
     beforeEach(function() {
-        logger = new LogStorage(Date.now() + i);
+        logger = new LogStorageJS(Date.now() + i);
         logger.setStorage(localStorage);
         i += 1;
     });
@@ -39,18 +29,18 @@ describe("LogStorage", function() {
         it("app es igual a (Date.now() + i)", function() {
             var app = Date.now() + i;
             i += 1;
-            logger = new LogStorage(app, LogStorageLevel.INFO);
+            logger = new LogStorageJS(app, LogStorageLevel.INFO);
             expect(logger.getApp()).to.equal(app);
         });
 
         it("log level es igual a INFO", function() {
-            logger = new LogStorage(Date.now() + i, LogStorageLevel.INFO);
+            logger = new LogStorageJS(Date.now() + i, LogStorageLevel.INFO);
             i += 1;
             expect(logger.getDefaultLogLevel()).to.equal("INFO");
         });
 
         it("version es igual a 2", function() {
-            logger = new LogStorage(Date.now() + i, LogStorageLevel.INFO, 2);
+            logger = new LogStorageJS(Date.now() + i, LogStorageLevel.INFO, 2);
             i += 1;
             expect(logger.getVersion()).to.equal(2);
         });
