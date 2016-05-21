@@ -1,5 +1,5 @@
 /**
- * LogStorage.js v0.2.2
+ * LogStorage.js v0.2.3
  * (c) Luis M. Fresneda
  */
 declare class LogStorageJS {

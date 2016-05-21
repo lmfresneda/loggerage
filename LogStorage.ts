@@ -1,5 +1,5 @@
 /**
- * LogStorageJS.js v0.2.2
+ * LogStorageJS.js v0.2.3
  * (c) Luis M. Fresneda
  */
 

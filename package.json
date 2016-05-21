@@ -1,6 +1,6 @@
 {
   "name": "LogStorage.js",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "LogStorage.js es un logger para Javascript que guarda el registro directamente en el localStorage. Tiene la capacidad de crear un archivo al solicitarlo por consola.",
   "author": "Luis M. Fresneda <lmiguelfresneda@gmail.com>",
   "main": "./build/LogStorage.js",
