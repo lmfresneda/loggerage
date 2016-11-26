@@ -1,24 +1,24 @@
 #LogStorage.js
 
-LogStorage.js es un logger para Javascript que guarda el registro directamente en el localStorage. Además, tiene la capacidad de poder crear un archivo `.csv` o `.txt` con el contenido del log.
+LogStorage.js is a Javascript logger who saves the register directly on localStorage. It also is able to create a .csv or .txt file with the log content. 
 
-##Cómo usar
+##How to use
 
-###Navegador
+###Browser
 
-[Descargar proyecto](https://github.com/lmfresneda/LogStorage.js/archive/master.zip "Descargar proyecto")
+[Download project](https://github.com/lmfresneda/LogStorage.js/archive/master.zip "Download project")
 
-Referenciar en nuestra página el script 
+Menction our webpage at the script
 
 ```html
 <script type="text/javascript" src="build/LogStorage.js"></script>
 ```
 
-Para hacer uso deberemos crear una instancia del logger:
+To use it we need to create an instance at the logger:
 
 ```javascript
-let logger = new LogStorageJS("MI-APP");
-logger.debug("Hola Mundo!");
+let logger = new LogStorageJS("MY-APP");
+logger.debug("Hello world!");
 ```
 
 ###npm
@@ -29,30 +29,30 @@ $ npm install LogStorage.js --save
 
 ```javascript
 let LogStorageJS = require("LogStorage.js").LogStorageJS;
-let logger = new LogStorageJS("MI-APP");
-logger.debug("Hola Mundo!");
+let logger = new LogStorageJS("MY-APP");
+logger.debug("Hello world!");
 ```
 
-El primer parámetro es un nombre que identifique nuestra aplicación dentro del localStorage, es decir, debería ser un nombre único para el logger. Podemos pasarle un segundo parámetro para indicar el nivel de log por defecto (si no lo pasamos, por defecto será `LogStorageJSLevel.DEBUG`) y un tercer parámetro que será la versión del logger (por defecto 1),
+First parameter is the name to identify our application at the localStorage, it means it has to be unique for the logger. We can use a second parameter to indicate the default log level(`LogStorageJSLevel.DEBUG` by default), and a third parameter indicating the logger version (1, by default),
 
-Al devolver la mayoría de métodos el propio logger, podremos encadenar llamadas:
+So the logger gives back most of the methods, we can chain calls (chaining):
 
 ```javascript
 logger.
-    debug("Hola Mundo!").
-    info("Mensaje de información").
-    debug("Termino");
+    debug("Hello world!").
+    info("Info message").
+    debug("End");
 ```
 
-##Requerimientos
+##Requirements
 
-LogStorage.js no tiene dependencias de ningún tipo. 
+LogStorage.js has no any kind of dependences. 
 
 ##API
 
 ###.setStorage( *otherStorage* ) : *LogStorageJS*
 
-Tendremos la capacidad de indicar un storage diferente en lugar del localStorage por defecto. Este nuevo storage debe implementar la interface `Storage` de la *[Web Storage API](https://developer.mozilla.org/en-US/docs/Web/API/Storage "Web Storage API")*. Ejemplo:
+We can indicate a different storage other than the default one. This new storage must implement Storage interface at the Web API Storage. Example:
 
 ```javascript
 let miNuevoStorage = {
@@ -65,84 +65,84 @@ let miNuevoStorage = {
 logger.setStorage(miNuevoStorage);
 ```
 
-Retorna el propio objeto LogStorageJS.
+Returns the LogStorageJS object itself.
 
 ###.getVersion( ) : *number*
 
-Devuelve la actual versión
+Returns actual version
 
 ###.getApp( ) : *string*
 
-Devuelve el nombre de la app indicado en el constructor
+Returns app name given at the constructor
 
 ###.setDefaultLogLevel( *defaultLogLevel* ) : *LogStorageJS*
 
-Modifica el nivel de log por defecto si llamamos directamente a `.log()`
+Modifies log default level if we call `.log()` directly 
 
 ###.getDefaultLogLevel( ) : *string*
 
-Devuelve el nivel de log por defecto actual
+Returns current default log level
 
 ###.getLog( ) : *Array\<LogStorageObject\>*
 
-Devuelve el log actual guardado en localStorage en formato Array de objetos LogStorageJSObject, el cual es del tipo:
+Returns actual log saved at localStorage in an object Array format LogStorageJSObject, like this:
 
 ```javascript
 LogStorageJSObject = {
-    date : "string", 		//fecha de creación en formato Date.toLocaleString()
-        level : "string", 		//nivel de log
-        message : "string" 	//mensaje logueado
+    date : "string", 		//Creation date in Date.toLocaleString() format
+        level : "string", 		//log level
+        message : "string" 	//logged message
 }
 ```
 
 ###.clearLog( ) : *LogStorageJS*
 
-Borra todo el log actual.
+Delete all current log.
 
 ###.downloadFileLog( *[type]* ) : *LogStorageJS*
 
-Descarga a un fichero el log actual. Podemos indicarle el tipo de fichero pasándole `"csv"` para crear un archivo en formato CSV o `"txt"` para crearlo en formato txt, en este último caso los datos de cada línea de log irán separados por tabulaciones, y en el caso de CSV irán por `";"`.
+Download current log file. We can indicate filetype with `"csv"` or `"txt"` parameters for .csv or .txt files. CSV files are separated by ';' and TXT files are separated by tabs
 
-El formato del nombre del fichero será:
+Name file format is:
 
-[ Nombre de la app ]_[ Date.now() ]_log.[ type ]
+[ App name ]_[ Date.now() ]_log.[ type ]
 
-Por ejemplo: `MI-APP_1462995577596_log.txt`
+Example: `MY-APP_1462995577596_log.txt`
 
 ###.info( *message* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel INFO
+Logs a message with INFO level
 
 ###.debug( *message* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel DEBUG
+Logs a message with DEBUG level
 
 ###.trace( *message* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel TRACE
+Logs a message with TARCE level
 
 ###.success( *message* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel SUCCESS
+Logs a message with SUCCESS level
 
 ###.warn( *message* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel WARN
+Logs a message with WARN level
 
 ###.error( *message[, stacktrace]* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel ERROR. Concatena al mensaje el `stacktrace` si existe
+Logs a message with ERROR level. Concats `stacktrace` to message if stacktrace exists
 
 ###.failure( *message[, stacktrace]* ) : *LogStorageJS*
 
-Loguea un mensaje con nivel FAILURE. Concatena al mensaje el `stacktrace` si existe
+Logs a message with FAILURE level. Concats stacktrace to message if `stacktrace` exists
 
 ###.log( *logLevel, message[, stacktrace]* ) : *LogStorageJS*
 
-Loguea un mensaje con el nivel indicado. Concatena al mensaje el `stacktrace` si existe
+Logs a message with given level. Concats stacktrace to message if `stacktrace` exists
 
 
-##Licencia
+##License
 
 * [MIT License](https://opensource.org/licenses/MIT)
 
