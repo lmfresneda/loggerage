@@ -1,9 +1,9 @@
 {
-  "name": "LogStorage.js",
-  "version": "0.2.4",
-  "description": "LogStorage.js es un logger para Javascript que guarda el registro directamente en el localStorage. Tiene la capacidad de crear un archivo al solicitarlo por consola.",
-  "author": "Luis M. Fresneda <lmiguelfresneda@gmail.com>",
-  "main": "./build/LogStorage.js",
+  "name": "loggerage",
+  "version": "1.0.0",
+  "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage.",
+  "author": "lmfreneda <lmiguelfresneda@gmail.com>",
+  "main": "./build/loggerage.js",
   "keywords": [
     "log",
     "logger",
@@ -13,15 +13,19 @@
     "javascript"
   ],
   "scripts": {
-    "test": "mocha"
+    "test": "mocha test/test.js",
+    "browserify-test": "browserify test/on_browser/spec/loggerageSpec.js -o test/on_browser/spec/bundleSpec.js"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/lmfresneda/LogStorage.js.git"
+    "url": "https://github.com/lmfresneda/loggerage.git"
   },
-  "typings": "./build/LogStorage.d.ts",
+  "bugs": {
+    "url": "https://github.com/lmfresneda/loggerage.git"
+  },
+  "typings": "./build/loggerage.d.ts",
   "license": "MIT",
-  "homepage": "https://github.com/lmfresneda/LogStorage.js",
+  "homepage": "https://github.com/lmfresneda/loggerage",
   "dependencies": {},
   "devDependencies": {
     "expect.js": "^0.3.1",

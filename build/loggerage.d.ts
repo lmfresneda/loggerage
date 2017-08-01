@@ -1,20 +1,21 @@
 /**
- * LogStorage.js v0.2.3
- * (c) Luis M. Fresneda
+ * loggerage.js v1.0.0
+ * (c) lmfresneda <https://github.com/lmfresneda/loggerage>
  */
-declare class LogStorageJS {
+export declare class Loggerage {
     /**
-     * Constructor for LogStorageJS
+     * Constructor for Loggerage
      * @param app               Name for App in localStorage
      * @param defaultLogLevel   Default log level
      * @param version           Version for this App
      */
-    constructor(app: string, defaultLogLevel?: LogStorageJSLevel, version?: number);/**
+    constructor(app: string, defaultLogLevel?: LoggerageLevel, version?: number);
+    /**
      * Set localStorage for test for example
      * @param otherStorage
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    setStorage(otherStorage:any):LogStorageJS;
+    setStorage(otherStorage: any): Loggerage;
     /**
      * Return de app version
      * @returns {number}
@@ -28,9 +29,9 @@ declare class LogStorageJS {
     /**
      * Set the default log level
      * @param defaultLogLevel
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    setDefaultLogLevel(defaultLogLevel: LogStorageJSLevel): LogStorageJS;
+    setDefaultLogLevel(defaultLogLevel: LoggerageLevel): Loggerage;
     /**
      * Get the default log level
      * @returns {string}
@@ -38,90 +39,91 @@ declare class LogStorageJS {
     getDefaultLogLevel(): string;
     /**
      * Get the actual log
-     * @returns {Array<LogStorageJSObject>}
+     * @returns {Array<LoggerageObject>}
      */
-    getLog(): Array<LogStorageJSObject>;
+    getLog(): Array<LoggerageObject>;
     /**
      * Clear all the log
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    clearLog(): LogStorageJS;
+    clearLog(): Loggerage;
     /**
      * Download the log in a file
      * @param type File type (csv || txt)
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    downloadFileLog(type?: string): LogStorageJS;
+    downloadFileLog(type?: string): Loggerage;
     /**
      * Log a message of all levels
      * @param logLevel
      * @param message
      * @param stacktrace [optional]
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    log(logLevel: LogStorageJSLevel, message: string, stacktrace?: string): LogStorageJS;
+    log(logLevel: LoggerageLevel, message: string, stacktrace?: string): Loggerage;
     /**
      * Log an info message
      * @param message
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    info(message: string): LogStorageJS;
+    info(message: string): Loggerage;
     /**
      * Log a debug message
      * @param message
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    debug(message: string): LogStorageJS;
+    debug(message: string): Loggerage;
     /**
      * Log a trace message
      * @param message
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    trace(message: string): LogStorageJS;
+    trace(message: string): Loggerage;
     /**
      * Log a success message
      * @param message
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    success(message: string): LogStorageJS;
+    success(message: string): Loggerage;
     /**
      * Log a warn message
      * @param message
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    warn(message: string): LogStorageJS;
+    warn(message: string): Loggerage;
     /**
      * Log an error message
      * @param message
      * @param stacktrace
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    error(message: string, stacktrace: string): LogStorageJS;
+    error(message: string, stacktrace: string): Loggerage;
     /**
      * Log a failure message
      * @param message
      * @param stacktrace
-     * @returns {LogStorageJS}
+     * @returns {Loggerage}
      */
-    failure(message: string, stacktrace: string): LogStorageJS;
+    failure(message: string, stacktrace: string): Loggerage;
+    private __localStorage__;
     /**
      * App name for localStorage
      */
-    private __app;
+    private __app__;
     /**
      * Version number for this app log
      */
-    private __version;
+    private __version__;
     /**
      * Default log level
      */
-    private __defaultLogLevel;
+    private __defaultLogLevel__;
     /**
      * Make an object for log
      * @param logLevel
      * @param message
      * @private
-     * @returns {LogStorageJSObject}
+     * @returns {LoggerageObject}
      */
     private __makeObjectToLog__(logLevel, message);
     /**
@@ -154,13 +156,13 @@ declare class LogStorageJS {
      */
     private static __downloadBlob__(blob, nameFile);
 }
-declare class LogStorageJSObject {
+export declare class LoggerageObject {
     date: string;
     level: string;
     message: string;
     constructor(level: string, message: string);
 }
-declare enum LogStorageJSLevel {
+export declare enum LoggerageLevel {
     DEBUG = 0,
     TRACE = 1,
     SUCCESS = 2,
