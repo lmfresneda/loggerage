@@ -1,5 +1,7 @@
 # LogStorage.js
 
+[![npm](https://img.shields.io/npm/v/LogStorage.js.svg?style=flat-square)](https://www.npmjs.com/package/LogStorage.js) [![npm](https://img.shields.io/npm/dt/LogStorage.js.svg?style=flat-square)](https://www.npmjs.com/package/LogStorage.js)
+
 LogStorage.js is a Javascript logger who saves the register directly on localStorage. It also is able to create a .csv or .txt file with the log content. 
 
 ## How to use
