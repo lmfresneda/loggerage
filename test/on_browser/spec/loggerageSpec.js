@@ -144,28 +144,14 @@ describe("loggerage", function() {
         });
     });
 
-    describe("Sin localStorage ni Blob", function () {
+    describe("Sin Blob", function () {
         it("Lanza excepción al descargar archivo porque no existe Blob (borrado)", function () {
             if(Blob) Blob = undefined;
             expect(function() {
                 logger.downloadFileLog();
             }).toThrowError("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
         });
-
-        it("Lanza excepción al construir porque no existe localStorage (borrado)", function () {
-            var _localStorage;
-            if(window.localStorage) {
-                _localStorage = window.localStorage;
-                delete window.localStorage;
-            }
-            expect(function() {
-                new Loggerage("ThrowError");
-            }).toThrowError("[localStorage] not exist in your app");
-            window.localStorage = _localStorage;
-        });
     });
-
-
 
 
 });

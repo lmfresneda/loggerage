@@ -15,15 +15,20 @@ var Loggerage = (function () {
     function Loggerage(app, defaultLogLevel, version) {
         if (defaultLogLevel === void 0) { defaultLogLevel = LoggerageLevel.DEBUG; }
         if (version === void 0) { version = 1; }
+        this.__isStorage__ = false;
         try {
-            if (!window.localStorage) {
-                throw new Error("[localStorage] not exist in your app");
+            if (window.localStorage) {
+                this.__localStorage__ = window.localStorage;
+                this.__isStorage__ = true;
             }
-            this.__localStorage__ = window.localStorage;
+            else {
+                console.warn('localStorage not found. Remember set your Storage by \'.setStorage() method\'');
+            }
         }
         catch (e) {
-            if (e.message == "[localStorage] not exist in your app")
+            if (e.message !== 'window is not defined') {
                 throw e;
+            }
         }
         this.__app__ = app;
         this.__version__ = version;
@@ -36,6 +41,7 @@ var Loggerage = (function () {
      */
     Loggerage.prototype.setStorage = function (otherStorage) {
         this.__localStorage__ = otherStorage;
+        this.__isStorage__ = true;
         return this;
     };
     /**
@@ -116,6 +122,9 @@ var Loggerage = (function () {
      */
     Loggerage.prototype.log = function (logLevel, message, stacktrace) {
         if (logLevel === void 0) { logLevel = this.__defaultLogLevel__; }
+        if (!this.__isStorage__) {
+            throw new Error('localStorage not found. Set your Storage by \'.setStorage() method\'');
+        }
         if (stacktrace) {
             message += "\n[Stack Trace: " + stacktrace + "]";
         }
@@ -201,15 +210,13 @@ var Loggerage = (function () {
      * @returns {string}
      * @private
      */
-    Loggerage.__buildCsvContent__ = function (ar) {
-        var contenido = "";
-        if (!ar.length)
+    Loggerage.__buildCsvContent__ = function (arr) {
+        var contenido = '';
+        if (!arr.length)
             return contenido;
-        contenido += Object.keys(ar[0]).join(";") + "\n";
-        ar.forEach(function (obj) {
-            contenido += Object.keys(obj).map(function (key) {
-                return obj[key];
-            }).join(";") + "\n";
+        contenido += Object.keys(arr[0]).join(';') + '\n';
+        arr.forEach(function (obj) {
+            contenido += Object.keys(obj).map(function (key) { return obj[key]; }).join(';') + '\n';
         });
         return contenido;
     };
@@ -219,14 +226,13 @@ var Loggerage = (function () {
      * @returns {string}
      * @private
      */
-    Loggerage.__buildTxtContent__ = function (ar) {
-        var contenido = "";
-        if (!ar.length)
+    Loggerage.__buildTxtContent__ = function (arr) {
+        var contenido = '';
+        if (!arr.length)
             return contenido;
-        ar.forEach(function (obj) {
-            contenido += Object.keys(obj).map(function (key) {
-                return obj[key];
-            }).join("\t") + "\n";
+        contenido += Object.keys(arr[0]).join('\t') + '\n';
+        arr.forEach(function (obj) {
+            contenido += Object.keys(obj).map(function (key) { return obj[key]; }).join('\t') + '\n';
         });
         return contenido;
     };
@@ -286,7 +292,9 @@ var Loggerage = (function () {
 exports.Loggerage = Loggerage;
 var LoggerageObject = (function () {
     function LoggerageObject(level, message) {
-        var now = new Date();
+        var ts = Date.now();
+        var now = new Date(ts);
+        this.timestamp = ts;
         this.date = now.toLocaleString();
         this.level = level;
         this.message = message;
@@ -451,28 +459,14 @@ describe("loggerage", function() {
         });
     });
 
-    describe("Sin localStorage ni Blob", function () {
+    describe("Sin Blob", function () {
         it("Lanza excepción al descargar archivo porque no existe Blob (borrado)", function () {
             if(Blob) Blob = undefined;
             expect(function() {
                 logger.downloadFileLog();
             }).toThrowError("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
         });
-
-        it("Lanza excepción al construir porque no existe localStorage (borrado)", function () {
-            var _localStorage;
-            if(window.localStorage) {
-                _localStorage = window.localStorage;
-                delete window.localStorage;
-            }
-            expect(function() {
-                new Loggerage("ThrowError");
-            }).toThrowError("[localStorage] not exist in your app");
-            window.localStorage = _localStorage;
-        });
     });
-
-
 
 
 });
