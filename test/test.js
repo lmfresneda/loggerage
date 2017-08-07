@@ -7,7 +7,9 @@ const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 const AsyncStorage = require('./async-storage');
 const asyncStorage = new AsyncStorage();
 
-function getAsyncLogger(app, level = LoggerageLevel.DEBUG, version = 1){
+function getAsyncLogger(app, level, version){
+  level = level || LoggerageLevel.DEBUG;
+  version = version || 1;
   const asyncLogger = new Loggerage(app, level, version);
   asyncLogger.setStorage(new AsyncStorage());
   asyncLogger.getLogAsync = promisify(asyncLogger.getLogAsync);
