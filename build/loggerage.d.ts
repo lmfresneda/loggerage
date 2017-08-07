@@ -119,6 +119,10 @@ export declare class Loggerage {
      */
     private __defaultLogLevel__;
     /**
+     * Indicate if localStorage is ok (false by default)
+     */
+    private __isStorage__;
+    /**
      * Make an object for log
      * @param logLevel
      * @param message
@@ -132,14 +136,14 @@ export declare class Loggerage {
      * @returns {string}
      * @private
      */
-    private static __buildCsvContent__(ar);
+    private static __buildCsvContent__(arr);
     /**
      * Build content for txt file
      * @param ar {Array}
      * @returns {string}
      * @private
      */
-    private static __buildTxtContent__(ar);
+    private static __buildTxtContent__(arr);
     /**
      * Make a blob with content
      * @param content   Content of blob
@@ -157,6 +161,7 @@ export declare class Loggerage {
     private static __downloadBlob__(blob, nameFile);
 }
 export declare class LoggerageObject {
+    timestamp: number;
     date: string;
     level: string;
     message: string;
