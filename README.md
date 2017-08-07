@@ -39,17 +39,19 @@ loggerage has no any kind of dependences.
 We can indicate a different storage other than the default one. This new storage must implement Storage interface at the [Web API Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage). Example:
 
 ```javascript
-let myNewStorage = {
+const myNewStorage = {
     key: 		function( key ){ /* ... */ },
-    getItem: 		function( keyName ){ /* ... */ },
-    setItem: 		function( keyName, keyValue ){ /* ... */ },
+    getItem: 		function( keyName ){ /* ... */ }, // remember, return only string type
+    setItem: 		function( keyName, keyValue ){ /* ... */ }, // remember, accept only string type
     removeItem: 	function( keyName ){ /* ... */ },
     clear: 		function( ){ /* ... */ }
 };
 logger.setStorage(myNewStorage);
 ```
 
-Returns the Loggerage object itself.
+**IMPORTANT**: loggerage always expected that these methods accept and return ONLY string type, like the default localStorage. In get and set methods, it will be used `JSON.parse` and `JSON.stringify` respectively.
+
+This method returns the Loggerage object itself.
 
 ### .getVersion( ) : *number*
 
