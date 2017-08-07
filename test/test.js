@@ -1,16 +1,17 @@
 const expect = require('expect.js');
 const localStorage = require('localStorage');
+global.localStorage = localStorage;
 const Loggerage = require("../build/loggerage").Loggerage;
 const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 
 describe("Loggerage", function() {
     var logger = new Loggerage(Date.now());
-    logger.setStorage(localStorage);
+    // logger.setStorage(localStorage);
     var i = 0;
 
     beforeEach(function() {
         logger = new Loggerage(Date.now() + i);
-        logger.setStorage(localStorage);
+        // logger.setStorage(localStorage);
         i += 1;
     });
 
@@ -135,6 +136,7 @@ describe("Loggerage", function() {
 
     describe("Without localStorage by default", function() {
         it("Fire exception if not exist default localStorage and not set it", function() {
+            global.localStorage = null;
             const _logger = new Loggerage("WITHOUT_LOCALSTORAGE");
             expect(function() {
                 _logger.info("One log");
@@ -142,6 +144,7 @@ describe("Loggerage", function() {
         });
 
         it("Fire exception if not exist default localStorage and set before", function() {
+            global.localStorage = null;
             const _logger = new Loggerage("WITHOUT_LOCALSTORAGE");
             expect(function() {
                 _logger.info("One log");

@@ -1,7 +1,3 @@
-/**
- * loggerage.js v1.0.0
- * (c) lmfresneda <https://github.com/lmfresneda/loggerage>
- */
 export declare class Loggerage {
     /**
      * Constructor for Loggerage
@@ -11,13 +7,13 @@ export declare class Loggerage {
      */
     constructor(app: string, defaultLogLevel?: LoggerageLevel, version?: number);
     /**
-     * Set localStorage for test for example
+     * Set your own Storage
      * @param otherStorage
      * @returns {Loggerage}
      */
     setStorage(otherStorage: any): Loggerage;
     /**
-     * Return de app version
+     * Return the app version
      * @returns {number}
      */
     getVersion(): number;
@@ -130,35 +126,6 @@ export declare class Loggerage {
      * @returns {LoggerageObject}
      */
     private __makeObjectToLog__(logLevel, message);
-    /**
-     * Build content for csv file
-     * @param ar {Array}
-     * @returns {string}
-     * @private
-     */
-    private static __buildCsvContent__(arr);
-    /**
-     * Build content for txt file
-     * @param ar {Array}
-     * @returns {string}
-     * @private
-     */
-    private static __buildTxtContent__(arr);
-    /**
-     * Make a blob with content
-     * @param content   Content of blob
-     * @param type      File type (csv || txt)
-     * @returns {Blob}
-     * @private
-     */
-    private static __getBlob__(content, type?);
-    /**
-     * Fire the download file
-     * @param blob
-     * @param nameFile
-     * @private
-     */
-    private static __downloadBlob__(blob, nameFile);
 }
 export declare class LoggerageObject {
     timestamp: number;

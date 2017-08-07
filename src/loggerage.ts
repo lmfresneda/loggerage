@@ -1,7 +1,11 @@
+import * as colors from 'colors';
+
 /**
  * loggerage.js v1.0.0
  * (c) lmfresneda <https://github.com/lmfresneda/loggerage>
  */
+
+declare var global: any;
 
 export class Loggerage {
     /**
@@ -16,13 +20,17 @@ export class Loggerage {
             if(window.localStorage){
                 this.__localStorage__ = window.localStorage;
                 this.__isStorage__ = true;
-            }else{
-                console.warn('localStorage not found. Remember set your Storage by \'.setStorage() method\'');
-            }
+            }else{ console.warn(
+                colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\'')); }
         } catch (e) {
-            if(e.message !== 'window is not defined'){
-                throw e;
-            }
+            if(e.message !== 'window is not defined') throw e;
+            try{
+                if(global.localStorage){
+                    this.__localStorage__ = global.localStorage;
+                    this.__isStorage__ = true;
+                }else{ console.warn(
+                    colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\'')); }
+            } catch (e) { if(e.message !== 'global is not defined') throw e; }
         }
 
         this.__app__ = app;
@@ -31,7 +39,7 @@ export class Loggerage {
     }
 
     /**
-     * Set localStorage for test for example
+     * Set your own Storage
      * @param otherStorage
      * @returns {Loggerage}
      */
@@ -42,7 +50,7 @@ export class Loggerage {
     }
 
     /**
-     * Return de app version
+     * Return the app version
      * @returns {number}
      */
     getVersion():number { return this.__version__; }
@@ -100,15 +108,15 @@ export class Loggerage {
             let contenido = "";
             switch (type.toLowerCase()) {
                 case "txt":
-                    contenido = Loggerage.__buildTxtContent__(this.getLog());
+                    contenido = Utils.__buildTxtContent__(this.getLog());
                     break;
                 case "csv":
-                    contenido = Loggerage.__buildCsvContent__(this.getLog());
+                    contenido = Utils.__buildCsvContent__(this.getLog());
                     break;
             }
-            let blob = Loggerage.__getBlob__(contenido, type);
+            let blob = Utils.__getBlob__(contenido, type);
             let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-            Loggerage.__downloadBlob__(blob, nameFile);
+            Utils.__downloadBlob__(blob, nameFile);
         }else {
             throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
         }
@@ -130,8 +138,8 @@ export class Loggerage {
         if(stacktrace){
             message += `\n[Stack Trace: ${stacktrace}]`;
         }
-        let logObj:LoggerageObject = this.__makeObjectToLog__(logLevel, message);
-        let logs:Array<LoggerageObject> = this.getLog();
+        const logObj:LoggerageObject = this.__makeObjectToLog__(logLevel, message);
+        const logs:Array<LoggerageObject> = this.getLog();
         logs.push(logObj);
         this.__localStorage__.setItem(this.__app__, JSON.stringify(logs));
         return this;
@@ -196,9 +204,9 @@ export class Loggerage {
         return this.log(LoggerageLevel.FAILURE, message, stacktrace);
     }
 
-    //                           //
-    //      PRIVATE METHODS      //
-    //                           //
+    //                   //
+    //      PRIVATE      //
+    //                   //
 
     private __localStorage__:any;
     /**
@@ -217,6 +225,7 @@ export class Loggerage {
      * Indicate if localStorage is ok (false by default)
      */
     private __isStorage__:boolean;
+
     /**
      * Make an object for log
      * @param logLevel
@@ -228,84 +237,7 @@ export class Loggerage {
         let logObj = new LoggerageObject(LoggerageLevel[logLevel], message);
         return logObj;
     }
-    /**
-     * Build content for csv file
-     * @param ar {Array}
-     * @returns {string}
-     * @private
-     */
-    private static __buildCsvContent__(arr:Array<any>):string {
-        let contenido = '';
-        if(!arr.length) return contenido;
-        contenido += Object.keys(arr[0]).join(';') + '\n';
-        arr.forEach((obj) => {
-            contenido += Object.keys(obj).map(key => obj[key]).join(';') + '\n';
-        });
-        return contenido;
-    }
-    /**
-     * Build content for txt file
-     * @param ar {Array}
-     * @returns {string}
-     * @private
-     */
-    private static __buildTxtContent__(arr:Array<any>):string {
-        let contenido = '';
-        if(!arr.length) return contenido;
-        contenido += Object.keys(arr[0]).join('\t') + '\n';
-        arr.forEach((obj) => {
-            contenido += Object.keys(obj).map(key => obj[key]).join('\t') + '\n';
-        });
-        return contenido;
-    }
-    /**
-     * Make a blob with content
-     * @param content   Content of blob
-     * @param type      File type (csv || txt)
-     * @returns {Blob}
-     * @private
-     */
-    private static __getBlob__(content:string, type:string = "txt"):Blob {
-        let blob:Blob;
-        let mime = 'text/plain';
-        switch (type.toLowerCase()){
-            case "csv": mime = 'text/csv';
-                break;
-        }
-        blob = new Blob(["\ufeff", content], {type: mime});
-        return blob;
-    }
-    /**
-     * Fire the download file
-     * @param blob
-     * @param nameFile
-     * @private
-     */
-    private static __downloadBlob__(blob:Blob, nameFile:string):void {
-        //[http://lmfresneda.esy.es/javascript/crear-archivo-csv-con-array-de-objecto-en-javascript/]
-        let reader = new FileReader();
-        let save;
-        reader.onload = function (event) {
-            save = document.createElement('a');
-            save.href = event.target["result"];
-            save.target = '_blank';
-            save.download = nameFile;
-            let clicEvent;
-            try {
-                clicEvent = new MouseEvent('click', {
-                    'view': window,
-                    'bubbles': true,
-                    'cancelable': true
-                });
-            } catch (e) {
-                clicEvent = document.createEvent("MouseEvent");
-                clicEvent.initEvent('click', true, true);
-            }
-            save.dispatchEvent(clicEvent);
-            (window.URL || window["webkitURL"]).revokeObjectURL(save.href);
-        };
-        reader.readAsDataURL(blob);
-    }
+    
  }
 
 
@@ -333,4 +265,81 @@ export enum LoggerageLevel {
     WARN,
     ERROR,
     FAILURE
+}
+
+class Utils {
+    /**
+     * Build content for csv file
+     * @param ar {Array}
+     * @returns {string}
+     */
+    static __buildCsvContent__(arr:Array<any>):string {
+        let contenido = '';
+        if(!arr.length) return contenido;
+        contenido += Object.keys(arr[0]).join(';') + '\n';
+        arr.forEach((obj) => {
+            contenido += Object.keys(obj).map(key => obj[key]).join(';') + '\n';
+        });
+        return contenido;
+    }
+    /**
+     * Build content for txt file
+     * @param ar {Array}
+     * @returns {string}
+     */
+    static __buildTxtContent__(arr:Array<any>):string {
+        let contenido = '';
+        if(!arr.length) return contenido;
+        contenido += Object.keys(arr[0]).join('\t') + '\n';
+        arr.forEach((obj) => {
+            contenido += Object.keys(obj).map(key => obj[key]).join('\t') + '\n';
+        });
+        return contenido;
+    }
+    /**
+     * Make a blob with content
+     * @param content   Content of blob
+     * @param type      File type (csv || txt)
+     * @returns {Blob}
+     */
+    static __getBlob__(content:string, type:string = "txt"):Blob {
+        let blob:Blob;
+        let mime = 'text/plain';
+        switch (type.toLowerCase()){
+            case "csv": mime = 'text/csv';
+                break;
+        }
+        blob = new Blob(["\ufeff", content], {type: mime});
+        return blob;
+    }
+    /**
+     * Fire the download file
+     * @param blob
+     * @param nameFile
+     */
+    static __downloadBlob__(blob:Blob, nameFile:string):void {
+        //[http://lmfresneda.esy.es/javascript/crear-archivo-csv-con-array-de-objecto-en-javascript/]
+        let reader = new FileReader();
+        let save;
+        reader.onload = function (event) {
+            save = document.createElement('a');
+            save.href = event.target["result"];
+            save.target = '_blank';
+            save.download = nameFile;
+            let clicEvent;
+            try {
+                clicEvent = new MouseEvent('click', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': true
+                });
+            } catch (e) {
+                clicEvent = document.createEvent("MouseEvent");
+                clicEvent.initEvent('click', true, true);
+            }
+            save.dispatchEvent(clicEvent);
+            (window.URL || window["webkitURL"]).revokeObjectURL(save.href);
+        };
+        reader.readAsDataURL(blob);
+    }
 }
