@@ -40,11 +40,11 @@ We can indicate a different storage other than the default one. This new storage
 
 ```javascript
 let myNewStorage = {
-    key: 			function( key ){ /* ... */ },
+    key: 		function( key ){ /* ... */ },
     getItem: 		function( keyName ){ /* ... */ },
     setItem: 		function( keyName, keyValue ){ /* ... */ },
     removeItem: 	function( keyName ){ /* ... */ },
-    clear: 			function( ){ /* ... */ }
+    clear: 		function( ){ /* ... */ }
 };
 logger.setStorage(myNewStorage);
 ```
@@ -69,13 +69,14 @@ Returns current default log level
 
 ### .getLog( ) : *Array\<LoggerageObject\>*
 
-Returns actual log saved at localStorage in an object Array format LoggerageObject, like this:
+Returns actual log saved at localStorage in an LoggerageObject Array, like this:
 
 ```javascript
 LoggerageObject = {
-    date : "string",    //Creation date in Date.toLocaleString() format
-    level : "string",   //log level
-    message : "string" 	//logged message
+    timestamp: number   // Created by Date.now()
+    date : "string",    // Creation date in Date.toLocaleString() format
+    level : "string",   // log level
+    message : "string" 	// logged message
 }
 ```
 
@@ -103,7 +104,7 @@ Logs a message with DEBUG level
 
 ### .trace( *message* ) : *Loggerage*
 
-Logs a message with TARCE level
+Logs a message with TRACE level
 
 ### .success( *message* ) : *Loggerage*
 
