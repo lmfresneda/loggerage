@@ -1,6 +1,7 @@
 const expect = require('expect.js');
 const localStorage = require('localStorage');
-const { Loggerage, LoggerageLevel } = require("../build/loggerage");
+const Loggerage = require("../build/loggerage").Loggerage;
+const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 
 describe("Loggerage", function() {
     let logger = new Loggerage(Date.now());
