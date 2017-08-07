@@ -4,9 +4,9 @@ const Loggerage = require("../build/loggerage").Loggerage;
 const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 
 describe("Loggerage", function() {
-    let logger = new Loggerage(Date.now());
+    var logger = new Loggerage(Date.now());
     logger.setStorage(localStorage);
-    let i = 0;
+    var i = 0;
 
     beforeEach(function() {
         logger = new Loggerage(Date.now() + i);
@@ -75,7 +75,7 @@ describe("Loggerage", function() {
             logger.info("Un log");
             logger.info("Otro log");
             logger.info("Otro log más");
-            let log = logger.getLog();
+            var log = logger.getLog();
             expect(log.length).to.equal(3);
             logger.clearLog();
             log = logger.getLog();
