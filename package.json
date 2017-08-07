@@ -32,6 +32,7 @@
   "devDependencies": {
     "expect.js": "^0.3.1",
     "localStorage": "^1.0.3",
-    "mocha": "^2.4.5"
+    "mocha": "^2.4.5",
+    "promisify-node": "^0.4.0"
   }
 }

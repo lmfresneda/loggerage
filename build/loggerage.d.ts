@@ -8,7 +8,7 @@ export declare class Loggerage {
     constructor(app: string, defaultLogLevel?: LoggerageLevel, version?: number);
     /**
      * Set your own Storage
-     * @param otherStorage
+     * @param otherStorage        Your Storage that implement Storage interface [https://developer.mozilla.org/en-US/docs/Web/API/Storage]
      * @returns {Loggerage}
      */
     setStorage(otherStorage: any): Loggerage;
@@ -39,16 +39,35 @@ export declare class Loggerage {
      */
     getLog(): Array<LoggerageObject>;
     /**
+     * Get the actual log asynchronously
+     * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
+     * @returns {void}
+     */
+    getLogAsync(callback: Function): void;
+    /**
      * Clear all the log
      * @returns {Loggerage}
      */
     clearLog(): Loggerage;
+    /**
+     * Clear all the log asynchronously
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    clearLogAsync(callback: Function): void;
     /**
      * Download the log in a file
      * @param type File type (csv || txt)
      * @returns {Loggerage}
      */
     downloadFileLog(type?: string): Loggerage;
+    /**
+     * Download the log in a file
+     * @param type     File type (csv || txt) txt by default
+     * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is blob.
+     * @returns {void}
+     */
+    downloadFileLogAsync(type: string, callback: Function): void;
     /**
      * Log a message of all levels
      * @param logLevel
@@ -58,11 +77,14 @@ export declare class Loggerage {
      */
     log(logLevel: LoggerageLevel, message: string, stacktrace?: string): Loggerage;
     /**
-     * Log an info message
-     * @param message
-     * @returns {Loggerage}
+     * Log a message of all levels
+     * @param logLevel       Level log
+     * @param message        Message to log
+     * @param stacktrace     (Can be null)
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
      */
-    info(message: string): Loggerage;
+    logAsync(logLevel: LoggerageLevel, message: string, stacktrace: string, callback: Function): void;
     /**
      * Log a debug message
      * @param message
@@ -70,11 +92,38 @@ export declare class Loggerage {
      */
     debug(message: string): Loggerage;
     /**
+     * Log a failure message
+     * @param message
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    debugAsync(message: string, callback: Function): void;
+    /**
+     * Log an info message
+     * @param message
+     * @returns {Loggerage}
+     */
+    info(message: string): Loggerage;
+    /**
+     * Log a failure message
+     * @param message
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    infoAsync(message: string, callback: Function): void;
+    /**
      * Log a trace message
      * @param message
      * @returns {Loggerage}
      */
     trace(message: string): Loggerage;
+    /**
+     * Log a failure message
+     * @param message
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    traceAsync(message: string, callback: Function): void;
     /**
      * Log a success message
      * @param message
@@ -82,25 +131,55 @@ export declare class Loggerage {
      */
     success(message: string): Loggerage;
     /**
+     * Log a failure message
+     * @param message
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    successAsync(message: string, callback: Function): void;
+    /**
      * Log a warn message
      * @param message
      * @returns {Loggerage}
      */
     warn(message: string): Loggerage;
     /**
+     * Log a failure message
+     * @param message
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    warnAsync(message: string, callback: Function): void;
+    /**
      * Log an error message
      * @param message
      * @param stacktrace
      * @returns {Loggerage}
      */
-    error(message: string, stacktrace: string): Loggerage;
+    error(message: string, stacktrace?: string): Loggerage;
+    /**
+     * Log a failure message
+     * @param message
+     * @param stacktrace
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    errorAsync(message: string, stacktrace: string, callback: Function): void;
     /**
      * Log a failure message
      * @param message
      * @param stacktrace
      * @returns {Loggerage}
      */
-    failure(message: string, stacktrace: string): Loggerage;
+    failure(message: string, stacktrace?: string): Loggerage;
+    /**
+     * Log a failure message
+     * @param message
+     * @param stacktrace
+     * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
+     * @returns {void}
+     */
+    failureAsync(message: string, stacktrace: string, callback: Function): void;
     private __localStorage__;
     /**
      * App name for localStorage
