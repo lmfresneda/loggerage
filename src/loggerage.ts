@@ -12,12 +12,17 @@ export class Loggerage {
      */
     constructor(app:string, defaultLogLevel:LoggerageLevel = LoggerageLevel.DEBUG, version:number = 1){
         this.__isStorage__ = false;
-
-        if(window && window.localStorage){
-            this.__localStorage__ = window.localStorage;
-            this.__isStorage__ = true;
-        }else{
-            console.warn('localStorage not found. Remember set your Storage by \'.setStorage() method\'');
+        try{
+            if(window.localStorage){
+                this.__localStorage__ = window.localStorage;
+                this.__isStorage__ = true;
+            }else{
+                console.warn('localStorage not found. Remember set your Storage by \'.setStorage() method\'');
+            }
+        } catch (e) {
+            if(e.message !== 'window is not defined'){
+                throw e;
+            }
         }
 
         this.__app__ = app;
