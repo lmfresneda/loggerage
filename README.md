@@ -5,7 +5,6 @@
 loggerage is a Javascript logger who saves the register directly on localStorage. It also is able to create a .csv or .txt file with the log content. 
 
 * [How to use](#how-to-use)
-* [Requirements](#requirements)
 * [API](#api)
 	* [(setStorage) How to change default storage](#setstorage)
 	* [(getVersion)](#getversion)
@@ -47,10 +46,6 @@ logger.
     info("Info message").
     debug("End");
 ```
-
-## <a name="requirements"></a>Requirements
-
-loggerage has no any kind of dependences. 
 
 ## <a name="api"></a>API
 
