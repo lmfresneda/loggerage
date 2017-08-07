@@ -16,8 +16,10 @@ export class Loggerage {
         if(window && window.localStorage){
             this.__localStorage__ = window.localStorage;
             this.__isStorage__ = true;
+        }else{
+            console.warn('localStorage not found. Remember set your Storage by \'.setStorage() method\'');
         }
-        
+
         this.__app__ = app;
         this.__version__ = version;
         this.__defaultLogLevel__ = defaultLogLevel;
@@ -116,6 +118,10 @@ export class Loggerage {
      * @returns {Loggerage}
      */
     log(logLevel:LoggerageLevel = this.__defaultLogLevel__, message:string, stacktrace?:string):Loggerage {
+        if(!this.__isStorage__){
+            throw new Error('localStorage not found. Set your Storage by \'.setStorage() method\'');            
+        }
+
         if(stacktrace){
             message += `\n[Stack Trace: ${stacktrace}]`;
         }
@@ -223,14 +229,12 @@ export class Loggerage {
      * @returns {string}
      * @private
      */
-    private static __buildCsvContent__(ar:Array<any>):string {
-        let contenido = "";
-        if(!ar.length) return contenido;
-        contenido += Object.keys(ar[0]).join(";") + "\n";
-        ar.forEach((obj) => {
-            contenido += Object.keys(obj).map((key) => {
-                    return obj[key];
-                }).join(";") + "\n";
+    private static __buildCsvContent__(arr:Array<any>):string {
+        let contenido = '';
+        if(!arr.length) return contenido;
+        contenido += Object.keys(arr[0]).join(';') + '\n';
+        arr.forEach((obj) => {
+            contenido += Object.keys(obj).map(key => obj[key]).join(';') + '\n';
         });
         return contenido;
     }
@@ -240,13 +244,12 @@ export class Loggerage {
      * @returns {string}
      * @private
      */
-    private static __buildTxtContent__(ar:Array<any>):string {
-        let contenido = "";
-        if(!ar.length) return contenido;
-        ar.forEach((obj) => {
-            contenido += Object.keys(obj).map((key) => {
-                    return obj[key];
-                }).join("\t") + "\n";
+    private static __buildTxtContent__(arr:Array<any>):string {
+        let contenido = '';
+        if(!arr.length) return contenido;
+        contenido += Object.keys(arr[0]).join('\t') + '\n';
+        arr.forEach((obj) => {
+            contenido += Object.keys(obj).map(key => obj[key]).join('\t') + '\n';
         });
         return contenido;
     }
@@ -303,11 +306,14 @@ export class Loggerage {
 
 
 export class LoggerageObject {
+    timestamp:number
     date:string;
     level:string;
     message:string;
     constructor(level:string, message:string){
-        let now = new Date();
+        const ts = Date.now();
+        const now = new Date(ts);
+        this.timestamp = ts;
         this.date = now.toLocaleString();
         this.level = level;
         this.message = message;
