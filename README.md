@@ -20,6 +20,7 @@ loggerage is a Javascript logger who saves the register directly on localStorage
 	* [INSERT LOG METHODS](#info)
 * [(Async) Things about async methods](#async)
 * [Convert async methods to Promises](#async-to-promises)
+* [Contributing](#contributing)
 * [Run test](#run-test)
 * [License](#license)
 
@@ -216,6 +217,10 @@ logger.debugAsync("Hello world!").then(() => {
 	// KO
 });
 ```
+
+## <a name="contributing"></a>Contributing
+
+If you want to contribute, [check this](CONTRIBUTING.md)
 
 ## <a name="run-test"></a>Run test
 
