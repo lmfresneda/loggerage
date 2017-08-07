@@ -1,7 +1,7 @@
 {
   "name": "loggerage",
-  "version": "1.1.1",
-  "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage.",
+  "version": "1.2.0",
+  "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage (or your own Storage)",
   "author": "lmfreneda <lmiguelfresneda@gmail.com>",
   "main": "./build/loggerage.js",
   "keywords": [
@@ -13,7 +13,7 @@
     "javascript"
   ],
   "scripts": {
-    "test": "mocha test/test.js",
+    "test": "tsc && mocha test/test.js",
     "browserify-test": "browserify test/on_browser/spec/loggerageSpec.js -o test/on_browser/spec/bundleSpec.js"
   },
   "repository": {
@@ -26,7 +26,9 @@
   "typings": "./build/loggerage.d.ts",
   "license": "MIT",
   "homepage": "https://github.com/lmfresneda/loggerage",
-  "dependencies": {},
+  "dependencies": {
+    "colors": "^1.1.2"
+  },
   "devDependencies": {
     "expect.js": "^0.3.1",
     "localStorage": "^1.0.3",
