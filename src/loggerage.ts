@@ -11,15 +11,13 @@ export class Loggerage {
      * @param version           Version for this App
      */
     constructor(app:string, defaultLogLevel:LoggerageLevel = LoggerageLevel.DEBUG, version:number = 1){
-        try {
-            if(!window.localStorage){
-                throw new Error(`[localStorage] not exist in your app`);
-            }
+        this.__isStorage__ = false;
+
+        if(window && window.localStorage){
             this.__localStorage__ = window.localStorage;
-        } catch (e) {
-            if(e.message == `[localStorage] not exist in your app`)
-                throw e;
+            this.__isStorage__ = true;
         }
+        
         this.__app__ = app;
         this.__version__ = version;
         this.__defaultLogLevel__ = defaultLogLevel;
@@ -32,6 +30,7 @@ export class Loggerage {
      */
     setStorage(otherStorage:any):Loggerage {
         this.__localStorage__ = otherStorage;
+        this.__isStorage__ = true;
         return this;
     }
 
@@ -203,6 +202,10 @@ export class Loggerage {
      * Default log level
      */
     private __defaultLogLevel__:LoggerageLevel;
+    /**
+     * Indicate if localStorage is ok (false by default)
+     */
+    private __isStorage__:boolean;
     /**
      * Make an object for log
      * @param logLevel
