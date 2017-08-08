@@ -251,7 +251,7 @@ isLocalStorage | `boolean` | `true` | Indicate if storage is the default localSt
 silence | `boolean` | `false` | If true, will not be displayed console logs
 version | `number \| string` | `1` | Version logger/application
 defaultLogLevel | `LoggerageLevel` | `LoggerageLevel.DEBUG` | Default level log
-storage | `object` | `null` | Our own storage, instead default localStorage
+storage | `object` | `null` | Our own storage, instead default localStorage. If set, `isLocalStorage` property set to false automatically
 
 ## <a name="async"></a>Async
 
