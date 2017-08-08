@@ -238,6 +238,11 @@ export declare class LoggerageObject {
      */
     app: string;
     /**
+     * App or logger version
+     * @type {number|string}
+     */
+    version: number | string;
+    /**
      * Timestamp of date log
      * @type {number}
      */
@@ -263,7 +268,7 @@ export declare class LoggerageObject {
      * @param {string} _message
      * @param {string} _app     Optional
      */
-    constructor(_level: string, _message: string, _app?: string);
+    constructor(_level: string, _message: string, _app?: string, _version?: number | string);
 }
 /**
  * Util enum for log level

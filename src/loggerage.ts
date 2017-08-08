@@ -430,7 +430,7 @@ export class Loggerage {
    * @returns {LoggerageObject}
    */
   private __makeObjectToLog__(logLevel:LoggerageLevel = this.__defaultLogLevel__, message:string):LoggerageObject {
-    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this.__app__);
+    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this.__app__, this.__version__);
     return logObj;
   }
     
@@ -446,6 +446,11 @@ export class LoggerageObject {
    * @type {string}
    */
   app:string;
+  /**
+   * App or logger version
+   * @type {number|string}
+   */
+  version:number|string;
   /**
    * Timestamp of date log
    * @type {number}
@@ -472,7 +477,7 @@ export class LoggerageObject {
    * @param {string} _message 
    * @param {string} _app     Optional
    */
-  constructor(_level:string, _message:string, _app?:string){
+  constructor(_level:string, _message:string, _app?:string, _version?:number|string){
     const ts = Date.now();
     const now = new Date(ts);
     this.timestamp = ts;
@@ -480,6 +485,7 @@ export class LoggerageObject {
     this.level = _level;
     this.message = _message;
     if(_app) this.app = _app;
+    if(_version) this.version = _version;
   }
 }
 

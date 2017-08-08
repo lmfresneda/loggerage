@@ -150,10 +150,12 @@ Returns the actual log saved at storage in an LoggerageObject Array, like this:
 
 ```javascript
 LoggerageObject = {
-    timestamp: number   // Created by Date.now()
-    date : "string",    // Creation date in Date.toLocaleString() format
-    level : "string",   // log level
-    message : "string"  // logged message
+    app: string,            // app or logger name
+    version: number|string, // app or logger version
+    timestamp: number,      // Created by Date.now()
+    date : "string",        // Creation date in Date.toLocaleString() format
+    level : "string",       // log level
+    message : "string"      // logged message
 }
 ```
 
