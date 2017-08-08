@@ -21,7 +21,7 @@
     "url": "https://github.com/lmfresneda/loggerage.git"
   },
   "bugs": {
-    "url": "https://github.com/lmfresneda/loggerage.git"
+    "url": "https://github.com/lmfresneda/loggerage/issues"
   },
   "typings": "./build/loggerage.d.ts",
   "license": "MIT",
