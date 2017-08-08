@@ -1,5 +1,6 @@
 ## [v1.3.0](https://github.com/lmfresneda/loggerage/releases/tag/1.3.0)
 
+* Insert app name property in each log
 * Accepted version as number or string
 * Accepted object at second parameter in constructor, instead defaultLogLevel and version. Although the old form is still accepted for retrocompatibility.
 
