@@ -1,41 +1,61 @@
-import * as colors from 'colors';
-
 /**
- * loggerage.js v1.0.0
- * (c) lmfresneda <https://github.com/lmfresneda/loggerage>
+ * (c) loggerage contributors 
+ * https://github.com/lmfresneda/loggerage
  */
 
+import * as colors from 'colors';
+import * as assign from 'object-assign';
+
+/**
+ * For simulate global scope
+ */
 declare var global: any;
 
+/**
+ * Loggerage class
+ */
 export class Loggerage {
   /**
    * Constructor for Loggerage
-   * @param app               Name for App in localStorage
-   * @param defaultLogLevel   Default log level
-   * @param version           Version for this App
+   * @param app    App or Logger name
+   * @param rest   Optional parameters
    */
-  constructor(app:string, defaultLogLevel:LoggerageLevel = LoggerageLevel.DEBUG, version:number = 1){
-    this.__isStorage__ = false;
-    try{
-      if(window.localStorage){
-        this.__localStorage__ = window.localStorage;
-        this.__isStorage__ = true;
-      }else{ console.warn(
-        colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\'')); }
-    } catch (e) {
-      if(e.message !== 'window is not defined') throw e;
-      try{
-        if(global.localStorage){
-          this.__localStorage__ = global.localStorage;
-          this.__isStorage__ = true;
-        }else{ console.warn(
-          colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\'')); }
-      } catch (e) { if(e.message !== 'global is not defined') throw e; }
+  constructor(app:string, ...rest:any[]){
+    let options = new LoggerageOptions();
+
+    if(rest.length && typeof rest[0] === 'object'){
+      options = assign(options, rest[0]);
+    }else if(rest.length){
+      console.warn(
+        colors.yellow('WARN: Remember, the old constructor is deprecated. See [https://github.com/lmfresneda/loggerage#new-constructor] for more details')); 
+      options.defaultLogLevel = rest[0];
+      options.version = rest[1] || 1;
+    }
+    var storage = options.storage;
+    if(!storage && options.isLocalStorage){
+      try{ if(window.localStorage) storage = window.localStorage; 
+      } catch (e) {
+        if(e.message !== 'window is not defined') throw e;
+        try{ if(global.localStorage) storage = global.localStorage;
+        } catch (e) { if(e.message !== 'global is not defined') throw e; }
+      }
     }
 
+    if(storage && !Utils.isStorageInterface(storage)){
+      throw new Error('[storage] property not implement \'getItem\' or \'setItem\' method');
+    }
+
+    if(storage){
+      this.__localStorage__ = storage;
+      this.__isStorage__ = true;
+    }else if(!options.silence){
+      console.warn(
+        colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\'')); 
+    }
+    this.__silence__ = options.silence;
     this.__app__ = app;
-    this.__version__ = version;
-    this.__defaultLogLevel__ = defaultLogLevel;
+    this.__version__ = options.version;
+    this.__defaultLogLevel__ = options.defaultLogLevel;
   }
 
   /**
@@ -43,11 +63,11 @@ export class Loggerage {
    * @param otherStorage        Your Storage that implement Storage interface [https://developer.mozilla.org/en-US/docs/Web/API/Storage]
    * @returns {Loggerage}
    */
-  setStorage(otherStorage:any):Loggerage {
-    if(!('getItem' in otherStorage) || !('setItem' in otherStorage))
-      throw new Error('[otherStorage] param not implement \'getItem\' or \'setItem\' method');
+  setStorage(storage:any):Loggerage {
+    if(!Utils.isStorageInterface(storage))
+      throw new Error('[storage] param not implement \'getItem\' or \'setItem\' method');
       
-    this.__localStorage__ = otherStorage;
+    this.__localStorage__ = storage;
     this.__isStorage__ = true;
     return this;
   }
@@ -56,7 +76,7 @@ export class Loggerage {
    * Return the app version
    * @returns {number}
    */
-  getVersion():number { return this.__version__; }
+  getVersion():number|string { return this.__version__; }
 
   /**
    * Return the app name for localStorage
@@ -80,6 +100,32 @@ export class Loggerage {
    */
   getDefaultLogLevel():string {
     return LoggerageLevel[this.__defaultLogLevel__];
+  }
+
+  /**
+   * Get the default log level number
+   * @returns {number}
+   */
+  getDefaultLogLevelNumber():number {
+    return this.__defaultLogLevel__;
+  }
+
+  /**
+   * Set the silence property
+   * @param silence
+   * @returns {Loggerage}
+   */
+  setSilence(silence:boolean):Loggerage {
+    this.__silence__ = silence;
+    return this;
+  }
+
+  /**
+   * Get the silence property
+   * @returns {boolean}
+   */
+  getSilence():boolean {
+    return this.__silence__;
   }
 
   /**
@@ -134,15 +180,15 @@ export class Loggerage {
       let contenido = "";
       switch (type.toLowerCase()) {
         case "txt":
-          contenido = Utils.__buildTxtContent__(this.getLog());
+          contenido = Utils.buildTxtContent(this.getLog());
           break;
         case "csv":
-          contenido = Utils.__buildCsvContent__(this.getLog());
+          contenido = Utils.buildCsvContent(this.getLog());
           break;
       }
-      let blob = Utils.__getBlob__(contenido, type);
+      let blob = Utils.getBlob(contenido, type);
       let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-      Utils.__downloadBlob__(blob, nameFile);
+      Utils.downloadBlob(blob, nameFile);
     }else {
       throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
     }
@@ -162,15 +208,15 @@ export class Loggerage {
       this.getLogAsync((logs) => {
         switch (type.toLowerCase()) {
           case "txt":
-            contenido = Utils.__buildTxtContent__(logs);
+            contenido = Utils.buildTxtContent(logs);
             break;
           case "csv":
-            contenido = Utils.__buildCsvContent__(logs);
+            contenido = Utils.buildCsvContent(logs);
             break;
         }
-        let blob = Utils.__getBlob__(contenido, type);
+        let blob = Utils.getBlob(contenido, type);
         let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-        Utils.__downloadBlob__(blob, nameFile);
+        Utils.downloadBlob(blob, nameFile);
         callback(null, blob);
       })
     }else {
@@ -360,9 +406,13 @@ export class Loggerage {
    */
   private __app__:string;
   /**
+   * If true, will not be displayed console logs
+   */
+  private __silence__:boolean;
+  /**
    * Version number for this app log
    */
-  private __version__:number;
+  private __version__:number|string;
   /**
    * Default log level
    */
@@ -370,7 +420,7 @@ export class Loggerage {
   /**
    * Indicate if localStorage is ok (false by default)
    */
-  private __isStorage__:boolean;
+  private __isStorage__:boolean = false;
 
   /**
    * Make an object for log
@@ -380,29 +430,62 @@ export class Loggerage {
    * @returns {LoggerageObject}
    */
   private __makeObjectToLog__(logLevel:LoggerageLevel = this.__defaultLogLevel__, message:string):LoggerageObject {
-    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message);
+    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this.__app__);
     return logObj;
   }
     
 }
 
 
-
+/**
+ * Each log
+ */
 export class LoggerageObject {
-  timestamp:number
+  /**
+   * App or logger name
+   * @type {string}
+   */
+  app:string;
+  /**
+   * Timestamp of date log
+   * @type {number}
+   */
+  timestamp:number;
+  /**
+   * Date log
+   * @type {string}
+   */
   date:string;
+  /**
+   * Level log
+   * @type {string}
+   */
   level:string;
+  /**
+   * Message log
+   * @type {string}
+   */
   message:string;
-  constructor(level:string, message:string){
+  /**
+   * Constructor
+   * @param {string} _level   
+   * @param {string} _message 
+   * @param {string} _app     Optional
+   */
+  constructor(_level:string, _message:string, _app?:string){
     const ts = Date.now();
     const now = new Date(ts);
     this.timestamp = ts;
     this.date = now.toLocaleString();
-    this.level = level;
-    this.message = message;
+    this.level = _level;
+    this.message = _message;
+    if(_app) this.app = _app;
   }
 }
 
+/**
+ * Util enum for log level
+ */
 export enum LoggerageLevel {
   DEBUG,
   TRACE,
@@ -413,13 +496,59 @@ export enum LoggerageLevel {
   FAILURE
 }
 
+/**
+ * Options for Loggerage constructor
+ */
+export class LoggerageOptions {
+  /**
+   * Indicate if storage is default localStorage.
+   * @default true
+   * @type {boolean}
+   */
+  isLocalStorage:boolean = true;
+  /**
+   * If true, will not be displayed console logs
+   * @default false
+   * @type {boolean}
+   */
+  silence:boolean = false;
+  /**
+   * Version aplicatton
+   * @default 1
+   * @type {Number|String}
+   */
+  version:number|string = 1;
+  /**
+   * Default log level if call .log() method directly
+   * @default LoggerageLevel.DEBUG
+   * @type {LoggerageLevel}
+   */
+  defaultLogLevel:LoggerageLevel = LoggerageLevel.DEBUG;
+  /**
+   * Storage to use. Should implement 'getItem' and 'setItem' of Storage interface
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/Storage
+   * @type {any}
+   */
+  storage:any;
+}
+
+/**
+ * Class of utilities
+ */
 class Utils {
+  /**
+   * Valid if storage implement Storage interface
+   * @param {any} storage 
+   */
+  static isStorageInterface(storage:any){
+    return 'getItem' in storage && 'setItem' in storage;
+  }
   /**
    * Build content for csv file
    * @param ar {Array}
    * @returns {string}
    */
-  static __buildCsvContent__(arr:Array<any>):string {
+  static buildCsvContent(arr:Array<any>):string {
     let contenido = '';
     if(!arr.length) return contenido;
     contenido += Object.keys(arr[0]).join(';') + '\n';
@@ -433,7 +562,7 @@ class Utils {
    * @param ar {Array}
    * @returns {string}
    */
-  static __buildTxtContent__(arr:Array<any>):string {
+  static buildTxtContent(arr:Array<any>):string {
     let contenido = '';
     if(!arr.length) return contenido;
     contenido += Object.keys(arr[0]).join('\t') + '\n';
@@ -448,7 +577,7 @@ class Utils {
    * @param type      File type (csv || txt)
    * @returns {Blob}
    */
-  static __getBlob__(content:string, type:string = "txt"):Blob {
+  static getBlob(content:string, type:string = "txt"):Blob {
     let blob:Blob;
     let mime = 'text/plain';
     switch (type.toLowerCase()){
@@ -463,7 +592,7 @@ class Utils {
    * @param blob
    * @param nameFile
    */
-  static __downloadBlob__(blob:Blob, nameFile:string):void {
+  static downloadBlob(blob:Blob, nameFile:string):void {
     //[http://lmfresneda.esy.es/javascript/crear-archivo-csv-con-array-de-objecto-en-javascript/]
     let reader = new FileReader();
     let save;

@@ -1,22 +1,24 @@
+/**
+ * Loggerage class
+ */
 export declare class Loggerage {
     /**
      * Constructor for Loggerage
-     * @param app               Name for App in localStorage
-     * @param defaultLogLevel   Default log level
-     * @param version           Version for this App
+     * @param app    App or Logger name
+     * @param rest   Optional parameters
      */
-    constructor(app: string, defaultLogLevel?: LoggerageLevel, version?: number);
+    constructor(app: string, ...rest: any[]);
     /**
      * Set your own Storage
      * @param otherStorage        Your Storage that implement Storage interface [https://developer.mozilla.org/en-US/docs/Web/API/Storage]
      * @returns {Loggerage}
      */
-    setStorage(otherStorage: any): Loggerage;
+    setStorage(storage: any): Loggerage;
     /**
      * Return the app version
      * @returns {number}
      */
-    getVersion(): number;
+    getVersion(): number | string;
     /**
      * Return the app name for localStorage
      * @returns {string}
@@ -33,6 +35,22 @@ export declare class Loggerage {
      * @returns {string}
      */
     getDefaultLogLevel(): string;
+    /**
+     * Get the default log level number
+     * @returns {number}
+     */
+    getDefaultLogLevelNumber(): number;
+    /**
+     * Set the silence property
+     * @param silence
+     * @returns {Loggerage}
+     */
+    setSilence(silence: boolean): Loggerage;
+    /**
+     * Get the silence property
+     * @returns {boolean}
+     */
+    getSilence(): boolean;
     /**
      * Get the actual log
      * @returns {Array<LoggerageObject>}
@@ -186,6 +204,10 @@ export declare class Loggerage {
      */
     private __app__;
     /**
+     * If true, will not be displayed console logs
+     */
+    private __silence__;
+    /**
      * Version number for this app log
      */
     private __version__;
@@ -206,13 +228,46 @@ export declare class Loggerage {
      */
     private __makeObjectToLog__(logLevel, message);
 }
+/**
+ * Each log
+ */
 export declare class LoggerageObject {
+    /**
+     * App or logger name
+     * @type {string}
+     */
+    app: string;
+    /**
+     * Timestamp of date log
+     * @type {number}
+     */
     timestamp: number;
+    /**
+     * Date log
+     * @type {string}
+     */
     date: string;
+    /**
+     * Level log
+     * @type {string}
+     */
     level: string;
+    /**
+     * Message log
+     * @type {string}
+     */
     message: string;
-    constructor(level: string, message: string);
+    /**
+     * Constructor
+     * @param {string} _level
+     * @param {string} _message
+     * @param {string} _app     Optional
+     */
+    constructor(_level: string, _message: string, _app?: string);
 }
+/**
+ * Util enum for log level
+ */
 export declare enum LoggerageLevel {
     DEBUG = 0,
     TRACE = 1,
@@ -221,4 +276,39 @@ export declare enum LoggerageLevel {
     WARN = 4,
     ERROR = 5,
     FAILURE = 6,
+}
+/**
+ * Options for Loggerage constructor
+ */
+export declare class LoggerageOptions {
+    /**
+     * Indicate if storage is default localStorage.
+     * @default true
+     * @type {boolean}
+     */
+    isLocalStorage: boolean;
+    /**
+     * If true, will not be displayed console logs
+     * @default false
+     * @type {boolean}
+     */
+    silence: boolean;
+    /**
+     * Version aplicatton
+     * @default 1
+     * @type {Number|String}
+     */
+    version: number | string;
+    /**
+     * Default log level if call .log() method directly
+     * @default LoggerageLevel.DEBUG
+     * @type {LoggerageLevel}
+     */
+    defaultLogLevel: LoggerageLevel;
+    /**
+     * Storage to use. Should implement 'getItem' and 'setItem' of Storage interface
+     * @see https://developer.mozilla.org/en-US/docs/Web/API/Storage
+     * @type {any}
+     */
+    storage: any;
 }
