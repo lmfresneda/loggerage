@@ -1,11 +1,12 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "outDir": "build/",
+    "outDir": "./build",
     "target": "es5",
     "inlineSourceMap": true,
     "noImplicitReturns": true,
-    "declaration": true
+    "declaration": true,
+    "declarationDir": "./types"
   },
-  "files": ["src/loggerage.ts"]
+  "include": ["./src/**/*"]
 }
