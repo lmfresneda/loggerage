@@ -1,7 +1,11 @@
+import { LoggerageOptions } from './loggerage-options';
+import { LoggerageObject } from './loggerage-object';
+import { LoggerageLevel } from './loggerage-level';
+import { Storage } from './storage-interface';
 /**
  * Loggerage class
  */
-export declare class Loggerage {
+declare class Loggerage {
     /**
      * Constructor for Loggerage
      * @param app    App or Logger name
@@ -13,7 +17,7 @@ export declare class Loggerage {
      * @param otherStorage        Your Storage that implement Storage interface [https://developer.mozilla.org/en-US/docs/Web/API/Storage]
      * @returns {Loggerage}
      */
-    setStorage(storage: any): Loggerage;
+    setStorage(storage: Storage): Loggerage;
     /**
      * Return the app version
      * @returns {number}
@@ -53,15 +57,15 @@ export declare class Loggerage {
     getSilence(): boolean;
     /**
      * Get the actual log
-     * @returns {Array<LoggerageObject>}
+     * @returns {LoggerageObject[]}
      */
-    getLog(): Array<LoggerageObject>;
+    getLog(): LoggerageObject[];
     /**
      * Get the actual log asynchronously
      * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
      * @returns {void}
      */
-    getLogAsync(callback: Function): void;
+    getLogAsync(callback: (error: Error, data?: LoggerageObject[]) => void): void;
     /**
      * Clear all the log
      * @returns {Loggerage}
@@ -72,7 +76,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    clearLogAsync(callback: Function): void;
+    clearLogAsync(callback: (error: Error | void) => void): void;
     /**
      * Download the log in a file
      * @param type File type (csv || txt)
@@ -85,7 +89,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is blob.
      * @returns {void}
      */
-    downloadFileLogAsync(type: string, callback: Function): void;
+    downloadFileLogAsync(type: string, callback: (error: Error | void, blob?: Blob) => void): void;
     /**
      * Log a message of all levels
      * @param logLevel
@@ -102,7 +106,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    logAsync(logLevel: LoggerageLevel, message: string, stacktrace: string, callback: Function): void;
+    logAsync(logLevel: LoggerageLevel, message: string, stacktrace: string, callback: (error: Error | void) => void): void;
     /**
      * Log a debug message
      * @param message
@@ -115,7 +119,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    debugAsync(message: string, callback: Function): void;
+    debugAsync(message: string, callback: (error: Error | void) => void): void;
     /**
      * Log an info message
      * @param message
@@ -128,7 +132,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    infoAsync(message: string, callback: Function): void;
+    infoAsync(message: string, callback: (error: Error | void) => void): void;
     /**
      * Log a trace message
      * @param message
@@ -141,7 +145,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    traceAsync(message: string, callback: Function): void;
+    traceAsync(message: string, callback: (error: Error | void) => void): void;
     /**
      * Log a success message
      * @param message
@@ -154,7 +158,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    successAsync(message: string, callback: Function): void;
+    successAsync(message: string, callback: (error: Error | void) => void): void;
     /**
      * Log a warn message
      * @param message
@@ -167,7 +171,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    warnAsync(message: string, callback: Function): void;
+    warnAsync(message: string, callback: (error: Error | void) => void): void;
     /**
      * Log an error message
      * @param message
@@ -182,7 +186,7 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    errorAsync(message: string, stacktrace: string, callback: Function): void;
+    errorAsync(message: string, stacktrace: string, callback: (error: Error | void) => void): void;
     /**
      * Log a failure message
      * @param message
@@ -197,28 +201,28 @@ export declare class Loggerage {
      * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
      * @returns {void}
      */
-    failureAsync(message: string, stacktrace: string, callback: Function): void;
-    private __localStorage__;
+    failureAsync(message: string, stacktrace: string, callback: (error: Error | void) => void): void;
+    private _storage;
     /**
      * App name for localStorage
      */
-    private __app__;
+    private _app;
     /**
      * If true, will not be displayed console logs
      */
-    private __silence__;
+    private _silence;
     /**
      * Version number for this app log
      */
-    private __version__;
+    private _version;
     /**
      * Default log level
      */
-    private __defaultLogLevel__;
+    private _defaultLogLevel;
     /**
      * Indicate if localStorage is ok (false by default)
      */
-    private __isStorage__;
+    private _isStorageOk;
     /**
      * Make an object for log
      * @param logLevel
@@ -226,94 +230,6 @@ export declare class Loggerage {
      * @private
      * @returns {LoggerageObject}
      */
-    private __makeObjectToLog__(logLevel, message);
+    private _makeLoggerageObject(logLevel, message);
 }
-/**
- * Each log
- */
-export declare class LoggerageObject {
-    /**
-     * App or logger name
-     * @type {string}
-     */
-    app: string;
-    /**
-     * App or logger version
-     * @type {number|string}
-     */
-    version: number | string;
-    /**
-     * Timestamp of date log
-     * @type {number}
-     */
-    timestamp: number;
-    /**
-     * Date log
-     * @type {string}
-     */
-    date: string;
-    /**
-     * Level log
-     * @type {string}
-     */
-    level: string;
-    /**
-     * Message log
-     * @type {string}
-     */
-    message: string;
-    /**
-     * Constructor
-     * @param {string} _level
-     * @param {string} _message
-     * @param {string} _app     Optional
-     */
-    constructor(_level: string, _message: string, _app?: string, _version?: number | string);
-}
-/**
- * Util enum for log level
- */
-export declare enum LoggerageLevel {
-    DEBUG = 0,
-    TRACE = 1,
-    SUCCESS = 2,
-    INFO = 3,
-    WARN = 4,
-    ERROR = 5,
-    FAILURE = 6,
-}
-/**
- * Options for Loggerage constructor
- */
-export declare class LoggerageOptions {
-    /**
-     * Indicate if storage is default localStorage.
-     * @default true
-     * @type {boolean}
-     */
-    isLocalStorage: boolean;
-    /**
-     * If true, will not be displayed console logs
-     * @default false
-     * @type {boolean}
-     */
-    silence: boolean;
-    /**
-     * Version aplicatton
-     * @default 1
-     * @type {Number|String}
-     */
-    version: number | string;
-    /**
-     * Default log level if call .log() method directly
-     * @default LoggerageLevel.DEBUG
-     * @type {LoggerageLevel}
-     */
-    defaultLogLevel: LoggerageLevel;
-    /**
-     * Storage to use. Should implement 'getItem' and 'setItem' of Storage interface
-     * @see https://developer.mozilla.org/en-US/docs/Web/API/Storage
-     * @type {any}
-     */
-    storage: any;
-}
+export { Loggerage, LoggerageOptions, LoggerageObject, LoggerageLevel };
