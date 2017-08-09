@@ -1,11 +1,20 @@
 "use strict";
+/// <reference types="es6-promise" />
+Object.defineProperty(exports, "__esModule", { value: true });
 /**
  * (c) loggerage contributors
  * https://github.com/lmfresneda/loggerage
  */
-Object.defineProperty(exports, "__esModule", { value: true });
 var colors = require("colors");
 var assign = require("object-assign");
+var utils_1 = require("./utils/utils");
+var wrap_localstorage_1 = require("./utils/wrap-localstorage");
+var loggerage_options_1 = require("./loggerage-options");
+exports.LoggerageOptions = loggerage_options_1.LoggerageOptions;
+var loggerage_object_1 = require("./loggerage-object");
+exports.LoggerageObject = loggerage_object_1.LoggerageObject;
+var loggerage_level_1 = require("./loggerage-level");
+exports.LoggerageLevel = loggerage_level_1.LoggerageLevel;
 /**
  * Loggerage class
  */
@@ -23,8 +32,8 @@ var Loggerage = (function () {
         /**
          * Indicate if localStorage is ok (false by default)
          */
-        this.__isStorage__ = false;
-        var options = new LoggerageOptions();
+        this._isStorageOk = false;
+        var options = new loggerage_options_1.LoggerageOptions();
         if (rest.length && typeof rest[0] === 'object') {
             options = assign(options, rest[0]);
         }
@@ -37,14 +46,14 @@ var Loggerage = (function () {
         if (!storage && options.isLocalStorage) {
             try {
                 if (window.localStorage)
-                    storage = window.localStorage;
+                    storage = new wrap_localstorage_1.WrapLocalStorage(window.localStorage);
             }
             catch (e) {
                 if (e.message !== 'window is not defined')
                     throw e;
                 try {
                     if (global.localStorage)
-                        storage = global.localStorage;
+                        storage = new wrap_localstorage_1.WrapLocalStorage(global.localStorage);
                 }
                 catch (e) {
                     if (e.message !== 'global is not defined')
@@ -52,20 +61,17 @@ var Loggerage = (function () {
                 }
             }
         }
-        if (storage && !Utils.isStorageInterface(storage)) {
-            throw new Error('[storage] property not implement \'getItem\' or \'setItem\' method');
-        }
         if (storage) {
-            this.__localStorage__ = storage;
-            this.__isStorage__ = true;
+            this._storage = storage;
+            this._isStorageOk = true;
         }
         else if (!options.silence) {
             console.warn(colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\''));
         }
-        this.__silence__ = options.silence;
-        this.__app__ = app;
-        this.__version__ = options.version;
-        this.__defaultLogLevel__ = options.defaultLogLevel;
+        this._silence = options.silence;
+        this._app = app;
+        this._version = options.version;
+        this._defaultLogLevel = options.defaultLogLevel;
     }
     /**
      * Set your own Storage
@@ -73,29 +79,27 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.setStorage = function (storage) {
-        if (!Utils.isStorageInterface(storage))
-            throw new Error('[storage] param not implement \'getItem\' or \'setItem\' method');
-        this.__localStorage__ = storage;
-        this.__isStorage__ = true;
+        this._storage = storage;
+        this._isStorageOk = true;
         return this;
     };
     /**
      * Return the app version
      * @returns {number}
      */
-    Loggerage.prototype.getVersion = function () { return this.__version__; };
+    Loggerage.prototype.getVersion = function () { return this._version; };
     /**
      * Return the app name for localStorage
      * @returns {string}
      */
-    Loggerage.prototype.getApp = function () { return this.__app__; };
+    Loggerage.prototype.getApp = function () { return this._app; };
     /**
      * Set the default log level
      * @param defaultLogLevel
      * @returns {Loggerage}
      */
     Loggerage.prototype.setDefaultLogLevel = function (defaultLogLevel) {
-        this.__defaultLogLevel__ = defaultLogLevel;
+        this._defaultLogLevel = defaultLogLevel;
         return this;
     };
     /**
@@ -103,14 +107,14 @@ var Loggerage = (function () {
      * @returns {string}
      */
     Loggerage.prototype.getDefaultLogLevel = function () {
-        return LoggerageLevel[this.__defaultLogLevel__];
+        return loggerage_level_1.LoggerageLevel[this._defaultLogLevel];
     };
     /**
      * Get the default log level number
      * @returns {number}
      */
     Loggerage.prototype.getDefaultLogLevelNumber = function () {
-        return this.__defaultLogLevel__;
+        return this._defaultLogLevel;
     };
     /**
      * Set the silence property
@@ -118,7 +122,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.setSilence = function (silence) {
-        this.__silence__ = silence;
+        this._silence = silence;
         return this;
     };
     /**
@@ -126,14 +130,14 @@ var Loggerage = (function () {
      * @returns {boolean}
      */
     Loggerage.prototype.getSilence = function () {
-        return this.__silence__;
+        return this._silence;
     };
     /**
      * Get the actual log
-     * @returns {Array<LoggerageObject>}
+     * @returns {LoggerageObject[]}
      */
     Loggerage.prototype.getLog = function () {
-        var logs = JSON.parse(this.__localStorage__.getItem(this.__app__) || "[]");
+        var logs = this._storage.getItem(this._app);
         return logs;
     };
     /**
@@ -142,9 +146,9 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.getLogAsync = function (callback) {
-        this.__localStorage__.getItem(this.__app__).then(function (data) {
-            var logs = JSON.parse(data || "[]");
-            callback(null, logs);
+        Promise.resolve(this._storage.getItem(this._app)).then(function (data) {
+            var logs = data;
+            callback(null, data);
         }).catch(function (err) {
             callback(err);
         });
@@ -154,7 +158,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.clearLog = function () {
-        this.__localStorage__.setItem(this.getApp(), "[]");
+        this._storage.clear();
         return this;
     };
     /**
@@ -163,7 +167,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.clearLogAsync = function (callback) {
-        this.__localStorage__.setItem(this.getApp(), "[]").then(callback).catch(callback);
+        Promise.resolve(this._storage.clear()).then(callback).catch(callback);
     };
     /**
      * Download the log in a file
@@ -177,15 +181,15 @@ var Loggerage = (function () {
             var contenido = "";
             switch (type.toLowerCase()) {
                 case "txt":
-                    contenido = Utils.buildTxtContent(this.getLog());
+                    contenido = utils_1.Utils.buildTxtContent(this.getLog());
                     break;
                 case "csv":
-                    contenido = Utils.buildCsvContent(this.getLog());
+                    contenido = utils_1.Utils.buildCsvContent(this.getLog());
                     break;
             }
-            var blob = Utils.getBlob(contenido, type);
+            var blob = utils_1.Utils.getBlob(contenido, type);
             var nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-            Utils.downloadBlob(blob, nameFile);
+            utils_1.Utils.downloadBlob(blob, nameFile);
         }
         else {
             throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
@@ -204,18 +208,20 @@ var Loggerage = (function () {
         if (Blob && (window.URL || window["webkitURL"])) {
             console.info("The file is building now");
             var contenido_1 = "";
-            this.getLogAsync(function (logs) {
+            this.getLogAsync(function (err, logs) {
+                if (err)
+                    return callback(err);
                 switch (type.toLowerCase()) {
                     case "txt":
-                        contenido_1 = Utils.buildTxtContent(logs);
+                        contenido_1 = utils_1.Utils.buildTxtContent(logs);
                         break;
                     case "csv":
-                        contenido_1 = Utils.buildCsvContent(logs);
+                        contenido_1 = utils_1.Utils.buildCsvContent(logs);
                         break;
                 }
-                var blob = Utils.getBlob(contenido_1, type);
+                var blob = utils_1.Utils.getBlob(contenido_1, type);
                 var nameFile = _this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-                Utils.downloadBlob(blob, nameFile);
+                utils_1.Utils.downloadBlob(blob, nameFile);
                 callback(null, blob);
             });
         }
@@ -231,17 +237,15 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.log = function (logLevel, message, stacktrace) {
-        if (logLevel === void 0) { logLevel = this.__defaultLogLevel__; }
-        if (!this.__isStorage__) {
+        if (logLevel === void 0) { logLevel = this._defaultLogLevel; }
+        if (!this._isStorageOk) {
             throw new Error('localStorage not found. Set your Storage by \'.setStorage() method\'');
         }
         if (stacktrace) {
             message += "\n[Stack Trace: " + stacktrace + "]";
         }
-        var logObj = this.__makeObjectToLog__(logLevel, message);
-        var logs = this.getLog();
-        logs.push(logObj);
-        this.__localStorage__.setItem(this.__app__, JSON.stringify(logs));
+        var logObj = this._makeLoggerageObject(logLevel, message);
+        this._storage.setItem(this._app, logObj);
         return this;
     };
     /**
@@ -253,21 +257,15 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.logAsync = function (logLevel, message, stacktrace, callback) {
-        var _this = this;
-        if (logLevel === void 0) { logLevel = this.__defaultLogLevel__; }
-        if (!this.__isStorage__) {
+        if (logLevel === void 0) { logLevel = this._defaultLogLevel; }
+        if (!this._isStorageOk) {
             return callback(new Error('localStorage not found. Set your Storage by \'.setStorage() method\''));
         }
         if (stacktrace) {
             message += "\n[Stack Trace: " + stacktrace + "]";
         }
-        var logObj = this.__makeObjectToLog__(logLevel, message);
-        this.getLogAsync(function (err, logs) {
-            if (err)
-                return callback(err);
-            logs.push(logObj);
-            _this.__localStorage__.setItem(_this.__app__, JSON.stringify(logs)).then(callback).catch(callback);
-        });
+        var logObj = this._makeLoggerageObject(logLevel, message);
+        Promise.resolve(this._storage.setItem(this._app, logObj)).then(callback).catch(callback);
     };
     /**
      * Log a debug message
@@ -275,7 +273,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.debug = function (message) {
-        return this.log(LoggerageLevel.DEBUG, message);
+        return this.log(loggerage_level_1.LoggerageLevel.DEBUG, message);
     };
     /**
      * Log a failure message
@@ -284,7 +282,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.debugAsync = function (message, callback) {
-        this.logAsync(LoggerageLevel.DEBUG, message, null, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.DEBUG, message, null, callback);
     };
     /**
      * Log an info message
@@ -292,7 +290,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.info = function (message) {
-        return this.log(LoggerageLevel.INFO, message);
+        return this.log(loggerage_level_1.LoggerageLevel.INFO, message);
     };
     /**
      * Log a failure message
@@ -301,7 +299,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.infoAsync = function (message, callback) {
-        this.logAsync(LoggerageLevel.INFO, message, null, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.INFO, message, null, callback);
     };
     /**
      * Log a trace message
@@ -309,7 +307,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.trace = function (message) {
-        return this.log(LoggerageLevel.TRACE, message);
+        return this.log(loggerage_level_1.LoggerageLevel.TRACE, message);
     };
     /**
      * Log a failure message
@@ -318,7 +316,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.traceAsync = function (message, callback) {
-        this.logAsync(LoggerageLevel.TRACE, message, null, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.TRACE, message, null, callback);
     };
     /**
      * Log a success message
@@ -326,7 +324,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.success = function (message) {
-        return this.log(LoggerageLevel.SUCCESS, message);
+        return this.log(loggerage_level_1.LoggerageLevel.SUCCESS, message);
     };
     /**
      * Log a failure message
@@ -335,7 +333,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.successAsync = function (message, callback) {
-        this.logAsync(LoggerageLevel.SUCCESS, message, null, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.SUCCESS, message, null, callback);
     };
     /**
      * Log a warn message
@@ -343,7 +341,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.warn = function (message) {
-        return this.log(LoggerageLevel.WARN, message);
+        return this.log(loggerage_level_1.LoggerageLevel.WARN, message);
     };
     /**
      * Log a failure message
@@ -352,7 +350,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.warnAsync = function (message, callback) {
-        this.logAsync(LoggerageLevel.WARN, message, null, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.WARN, message, null, callback);
     };
     /**
      * Log an error message
@@ -361,7 +359,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.error = function (message, stacktrace) {
-        return this.log(LoggerageLevel.ERROR, message, stacktrace);
+        return this.log(loggerage_level_1.LoggerageLevel.ERROR, message, stacktrace);
     };
     /**
      * Log a failure message
@@ -371,7 +369,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.errorAsync = function (message, stacktrace, callback) {
-        this.logAsync(LoggerageLevel.ERROR, message, stacktrace, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.ERROR, message, stacktrace, callback);
     };
     /**
      * Log a failure message
@@ -380,7 +378,7 @@ var Loggerage = (function () {
      * @returns {Loggerage}
      */
     Loggerage.prototype.failure = function (message, stacktrace) {
-        return this.log(LoggerageLevel.FAILURE, message, stacktrace);
+        return this.log(loggerage_level_1.LoggerageLevel.FAILURE, message, stacktrace);
     };
     /**
      * Log a failure message
@@ -390,7 +388,7 @@ var Loggerage = (function () {
      * @returns {void}
      */
     Loggerage.prototype.failureAsync = function (message, stacktrace, callback) {
-        this.logAsync(LoggerageLevel.FAILURE, message, stacktrace, callback);
+        this.logAsync(loggerage_level_1.LoggerageLevel.FAILURE, message, stacktrace, callback);
     };
     /**
      * Make an object for log
@@ -399,177 +397,12 @@ var Loggerage = (function () {
      * @private
      * @returns {LoggerageObject}
      */
-    Loggerage.prototype.__makeObjectToLog__ = function (logLevel, message) {
-        if (logLevel === void 0) { logLevel = this.__defaultLogLevel__; }
-        var logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this.__app__, this.__version__);
+    Loggerage.prototype._makeLoggerageObject = function (logLevel, message) {
+        if (logLevel === void 0) { logLevel = this._defaultLogLevel; }
+        var logObj = new loggerage_object_1.LoggerageObject(loggerage_level_1.LoggerageLevel[logLevel], message, this._app, this._version);
         return logObj;
     };
     return Loggerage;
 }());
 exports.Loggerage = Loggerage;
-/**
- * Each log
- */
-var LoggerageObject = (function () {
-    /**
-     * Constructor
-     * @param {string} _level
-     * @param {string} _message
-     * @param {string} _app     Optional
-     */
-    function LoggerageObject(_level, _message, _app, _version) {
-        var ts = Date.now();
-        var now = new Date(ts);
-        this.timestamp = ts;
-        this.date = now.toLocaleString();
-        this.level = _level;
-        this.message = _message;
-        if (_app)
-            this.app = _app;
-        if (_version)
-            this.version = _version;
-    }
-    return LoggerageObject;
-}());
-exports.LoggerageObject = LoggerageObject;
-/**
- * Util enum for log level
- */
-var LoggerageLevel;
-(function (LoggerageLevel) {
-    LoggerageLevel[LoggerageLevel["DEBUG"] = 0] = "DEBUG";
-    LoggerageLevel[LoggerageLevel["TRACE"] = 1] = "TRACE";
-    LoggerageLevel[LoggerageLevel["SUCCESS"] = 2] = "SUCCESS";
-    LoggerageLevel[LoggerageLevel["INFO"] = 3] = "INFO";
-    LoggerageLevel[LoggerageLevel["WARN"] = 4] = "WARN";
-    LoggerageLevel[LoggerageLevel["ERROR"] = 5] = "ERROR";
-    LoggerageLevel[LoggerageLevel["FAILURE"] = 6] = "FAILURE";
-})(LoggerageLevel = exports.LoggerageLevel || (exports.LoggerageLevel = {}));
-/**
- * Options for Loggerage constructor
- */
-var LoggerageOptions = (function () {
-    function LoggerageOptions() {
-        /**
-         * Indicate if storage is default localStorage.
-         * @default true
-         * @type {boolean}
-         */
-        this.isLocalStorage = true;
-        /**
-         * If true, will not be displayed console logs
-         * @default false
-         * @type {boolean}
-         */
-        this.silence = false;
-        /**
-         * Version aplicatton
-         * @default 1
-         * @type {Number|String}
-         */
-        this.version = 1;
-        /**
-         * Default log level if call .log() method directly
-         * @default LoggerageLevel.DEBUG
-         * @type {LoggerageLevel}
-         */
-        this.defaultLogLevel = LoggerageLevel.DEBUG;
-    }
-    return LoggerageOptions;
-}());
-exports.LoggerageOptions = LoggerageOptions;
-/**
- * Class of utilities
- */
-var Utils = (function () {
-    function Utils() {
-    }
-    /**
-     * Valid if storage implement Storage interface
-     * @param {any} storage
-     */
-    Utils.isStorageInterface = function (storage) {
-        return 'getItem' in storage && 'setItem' in storage;
-    };
-    /**
-     * Build content for csv file
-     * @param ar {Array}
-     * @returns {string}
-     */
-    Utils.buildCsvContent = function (arr) {
-        var contenido = '';
-        if (!arr.length)
-            return contenido;
-        contenido += Object.keys(arr[0]).join(';') + '\n';
-        arr.forEach(function (obj) {
-            contenido += Object.keys(obj).map(function (key) { return obj[key]; }).join(';') + '\n';
-        });
-        return contenido;
-    };
-    /**
-     * Build content for txt file
-     * @param ar {Array}
-     * @returns {string}
-     */
-    Utils.buildTxtContent = function (arr) {
-        var contenido = '';
-        if (!arr.length)
-            return contenido;
-        contenido += Object.keys(arr[0]).join('\t') + '\n';
-        arr.forEach(function (obj) {
-            contenido += Object.keys(obj).map(function (key) { return obj[key]; }).join('\t') + '\n';
-        });
-        return contenido;
-    };
-    /**
-     * Make a blob with content
-     * @param content   Content of blob
-     * @param type      File type (csv || txt)
-     * @returns {Blob}
-     */
-    Utils.getBlob = function (content, type) {
-        if (type === void 0) { type = "txt"; }
-        var blob;
-        var mime = 'text/plain';
-        switch (type.toLowerCase()) {
-            case "csv":
-                mime = 'text/csv';
-                break;
-        }
-        blob = new Blob(["\ufeff", content], { type: mime });
-        return blob;
-    };
-    /**
-     * Fire the download file
-     * @param blob
-     * @param nameFile
-     */
-    Utils.downloadBlob = function (blob, nameFile) {
-        //[http://lmfresneda.esy.es/javascript/crear-archivo-csv-con-array-de-objecto-en-javascript/]
-        var reader = new FileReader();
-        var save;
-        reader.onload = function (event) {
-            save = document.createElement('a');
-            save.href = event.target["result"];
-            save.target = '_blank';
-            save.download = nameFile;
-            var clicEvent;
-            try {
-                clicEvent = new MouseEvent('click', {
-                    'view': window,
-                    'bubbles': true,
-                    'cancelable': true
-                });
-            }
-            catch (e) {
-                clicEvent = document.createEvent("MouseEvent");
-                clicEvent.initEvent('click', true, true);
-            }
-            save.dispatchEvent(clicEvent);
-            (window.URL || window["webkitURL"]).revokeObjectURL(save.href);
-        };
-        reader.readAsDataURL(blob);
-    };
-    return Utils;
-}());
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZ2VyYWdlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL2xvZ2dlcmFnZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUE7OztHQUdHOztBQUVILCtCQUFpQztBQUNqQyxzQ0FBd0M7QUFPeEM7O0dBRUc7QUFDSDtJQUNFOzs7O09BSUc7SUFDSCxtQkFBWSxHQUFVO1FBQUUsY0FBYTthQUFiLFVBQWEsRUFBYixxQkFBYSxFQUFiLElBQWE7WUFBYiw2QkFBYTs7UUE2WXJDOztXQUVHO1FBQ0ssa0JBQWEsR0FBVyxLQUFLLENBQUM7UUEvWXBDLElBQUksT0FBTyxHQUFHLElBQUksZ0JBQWdCLEVBQUUsQ0FBQztRQUVyQyxFQUFFLENBQUEsQ0FBQyxJQUFJLENBQUMsTUFBTSxJQUFJLE9BQU8sSUFBSSxDQUFDLENBQUMsQ0FBQyxLQUFLLFFBQVEsQ0FBQyxDQUFBLENBQUM7WUFDN0MsT0FBTyxHQUFHLE1BQU0sQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7UUFDckMsQ0FBQztRQUFBLElBQUksQ0FBQyxFQUFFLENBQUEsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUEsQ0FBQztZQUNwQixPQUFPLENBQUMsSUFBSSxDQUNWLE1BQU0sQ0FBQyxNQUFNLENBQUMsbUlBQW1JLENBQUMsQ0FBQyxDQUFDO1lBQ3RKLE9BQU8sQ0FBQyxlQUFlLEdBQUcsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO1lBQ2xDLE9BQU8sQ0FBQyxPQUFPLEdBQUcsSUFBSSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNqQyxDQUFDO1FBQ0QsSUFBSSxPQUFPLEdBQUcsT0FBTyxDQUFDLE9BQU8sQ0FBQztRQUM5QixFQUFFLENBQUEsQ0FBQyxDQUFDLE9BQU8sSUFBSSxPQUFPLENBQUMsY0FBYyxDQUFDLENBQUEsQ0FBQztZQUNyQyxJQUFHLENBQUM7Z0JBQUMsRUFBRSxDQUFBLENBQUMsTUFBTSxDQUFDLFlBQVksQ0FBQztvQkFBQyxPQUFPLEdBQUcsTUFBTSxDQUFDLFlBQVksQ0FBQztZQUMzRCxDQUFDO1lBQUMsS0FBSyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQztnQkFDWCxFQUFFLENBQUEsQ0FBQyxDQUFDLENBQUMsT0FBTyxLQUFLLHVCQUF1QixDQUFDO29CQUFDLE1BQU0sQ0FBQyxDQUFDO2dCQUNsRCxJQUFHLENBQUM7b0JBQUMsRUFBRSxDQUFBLENBQUMsTUFBTSxDQUFDLFlBQVksQ0FBQzt3QkFBQyxPQUFPLEdBQUcsTUFBTSxDQUFDLFlBQVksQ0FBQztnQkFDM0QsQ0FBQztnQkFBQyxLQUFLLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDO29CQUFDLEVBQUUsQ0FBQSxDQUFDLENBQUMsQ0FBQyxPQUFPLEtBQUssdUJBQXVCLENBQUM7d0JBQUMsTUFBTSxDQUFDLENBQUM7Z0JBQUMsQ0FBQztZQUNwRSxDQUFDO1FBQ0gsQ0FBQztRQUVELEVBQUUsQ0FBQSxDQUFDLE9BQU8sSUFBSSxDQUFDLEtBQUssQ0FBQyxrQkFBa0IsQ0FBQyxPQUFPLENBQUMsQ0FBQyxDQUFBLENBQUM7WUFDaEQsTUFBTSxJQUFJLEtBQUssQ0FBQyxvRUFBb0UsQ0FBQyxDQUFDO1FBQ3hGLENBQUM7UUFFRCxFQUFFLENBQUEsQ0FBQyxPQUFPLENBQUMsQ0FBQSxDQUFDO1lBQ1YsSUFBSSxDQUFDLGdCQUFnQixHQUFHLE9BQU8sQ0FBQztZQUNoQyxJQUFJLENBQUMsYUFBYSxHQUFHLElBQUksQ0FBQztRQUM1QixDQUFDO1FBQUEsSUFBSSxDQUFDLEVBQUUsQ0FBQSxDQUFDLENBQUMsT0FBTyxDQUFDLE9BQU8sQ0FBQyxDQUFBLENBQUM7WUFDekIsT0FBTyxDQUFDLElBQUksQ0FDVixNQUFNLENBQUMsTUFBTSxDQUFDLHFGQUFxRixDQUFDLENBQUMsQ0FBQztRQUMxRyxDQUFDO1FBQ0QsSUFBSSxDQUFDLFdBQVcsR0FBRyxPQUFPLENBQUMsT0FBTyxDQUFDO1FBQ25DLElBQUksQ0FBQyxPQUFPLEdBQUcsR0FBRyxDQUFDO1FBQ25CLElBQUksQ0FBQyxXQUFXLEdBQUcsT0FBTyxDQUFDLE9BQU8sQ0FBQztRQUNuQyxJQUFJLENBQUMsbUJBQW1CLEdBQUcsT0FBTyxDQUFDLGVBQWUsQ0FBQztJQUNyRCxDQUFDO0lBRUQ7Ozs7T0FJRztJQUNILDhCQUFVLEdBQVYsVUFBVyxPQUFXO1FBQ3BCLEVBQUUsQ0FBQSxDQUFDLENBQUMsS0FBSyxDQUFDLGtCQUFrQixDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBQ3BDLE1BQU0sSUFBSSxLQUFLLENBQUMsaUVBQWlFLENBQUMsQ0FBQztRQUVyRixJQUFJLENBQUMsZ0JBQWdCLEdBQUcsT0FBTyxDQUFDO1FBQ2hDLElBQUksQ0FBQyxhQUFhLEdBQUcsSUFBSSxDQUFDO1FBQzFCLE1BQU0sQ0FBQyxJQUFJLENBQUM7SUFDZCxDQUFDO0lBRUQ7OztPQUdHO0lBQ0gsOEJBQVUsR0FBVixjQUE2QixNQUFNLENBQUMsSUFBSSxDQUFDLFdBQVcsQ0FBQyxDQUFDLENBQUM7SUFFdkQ7OztPQUdHO0lBQ0gsMEJBQU0sR0FBTixjQUFrQixNQUFNLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDLENBQUM7SUFFeEM7Ozs7T0FJRztJQUNILHNDQUFrQixHQUFsQixVQUFtQixlQUE4QjtRQUMvQyxJQUFJLENBQUMsbUJBQW1CLEdBQUcsZUFBZSxDQUFDO1FBQzNDLE1BQU0sQ0FBQyxJQUFJLENBQUM7SUFDZCxDQUFDO0lBRUQ7OztPQUdHO0lBQ0gsc0NBQWtCLEdBQWxCO1FBQ0UsTUFBTSxDQUFDLGNBQWMsQ0FBQyxJQUFJLENBQUMsbUJBQW1CLENBQUMsQ0FBQztJQUNsRCxDQUFDO0lBRUQ7OztPQUdHO0lBQ0gsNENBQXdCLEdBQXhCO1FBQ0UsTUFBTSxDQUFDLElBQUksQ0FBQyxtQkFBbUIsQ0FBQztJQUNsQyxDQUFDO0lBRUQ7Ozs7T0FJRztJQUNILDhCQUFVLEdBQVYsVUFBVyxPQUFlO1FBQ3hCLElBQUksQ0FBQyxXQUFXLEdBQUcsT0FBTyxDQUFDO1FBQzNCLE1BQU0sQ0FBQyxJQUFJLENBQUM7SUFDZCxDQUFDO0lBRUQ7OztPQUdHO0lBQ0gsOEJBQVUsR0FBVjtRQUNFLE1BQU0sQ0FBQyxJQUFJLENBQUMsV0FBVyxDQUFDO0lBQzFCLENBQUM7SUFFRDs7O09BR0c7SUFDSCwwQkFBTSxHQUFOO1FBQ0UsSUFBSSxJQUFJLEdBQTBCLElBQUksQ0FBQyxLQUFLLENBQUMsSUFBSSxDQUFDLGdCQUFnQixDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsT0FBTyxDQUFDLElBQUksSUFBSSxDQUFDLENBQUM7UUFDbEcsTUFBTSxDQUFDLElBQUksQ0FBQztJQUNkLENBQUM7SUFFRDs7OztPQUlHO0lBQ0gsK0JBQVcsR0FBWCxVQUFZLFFBQWlCO1FBQ3pCLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLE9BQU8sQ0FBQyxDQUFDLElBQUksQ0FBQyxVQUFDLElBQUk7WUFDbEQsSUFBTSxJQUFJLEdBQTBCLElBQUksQ0FBQyxLQUFLLENBQUMsSUFBSSxJQUFJLElBQUksQ0FBQyxDQUFDO1lBQzdELFFBQVEsQ0FBQyxJQUFJLEVBQUUsSUFBSSxDQUFDLENBQUM7UUFDekIsQ0FBQyxDQUFDLENBQUMsS0FBSyxDQUFDLFVBQUMsR0FBRztZQUNULFFBQVEsQ0FBQyxHQUFHLENBQUMsQ0FBQztRQUNsQixDQUFDLENBQUMsQ0FBQztJQUNQLENBQUM7SUFFRDs7O09BR0c7SUFDSCw0QkFBUSxHQUFSO1FBQ0UsSUFBSSxDQUFDLGdCQUFnQixDQUFDLE9BQU8sQ0FBQyxJQUFJLENBQUMsTUFBTSxFQUFFLEVBQUUsSUFBSSxDQUFDLENBQUM7UUFDbkQsTUFBTSxDQUFDLElBQUksQ0FBQztJQUNkLENBQUM7SUFFRDs7OztPQUlHO0lBQ0gsaUNBQWEsR0FBYixVQUFjLFFBQWlCO1FBQzdCLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxFQUFFLElBQUksQ0FBQyxDQUFDLElBQUksQ0FBQyxRQUFRLENBQUMsQ0FBQyxLQUFLLENBQUMsUUFBUSxDQUFDLENBQUM7SUFDcEYsQ0FBQztJQUVEOzs7O09BSUc7SUFDSCxtQ0FBZSxHQUFmLFVBQWdCLElBQW1CO1FBQW5CLHFCQUFBLEVBQUEsWUFBbUI7UUFDakMsRUFBRSxDQUFBLENBQUMsSUFBSSxJQUFJLENBQUMsTUFBTSxDQUFDLEdBQUcsSUFBSSxNQUFNLENBQUMsV0FBVyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7WUFDL0MsT0FBTyxDQUFDLElBQUksQ0FBQywwQkFBMEIsQ0FBQyxDQUFDO1lBQ3pDLElBQUksU0FBUyxHQUFHLEVBQUUsQ0FBQztZQUNuQixNQUFNLENBQUMsQ0FBQyxJQUFJLENBQUMsV0FBVyxFQUFFLENBQUMsQ0FBQyxDQUFDO2dCQUMzQixLQUFLLEtBQUs7b0JBQ1IsU0FBUyxHQUFHLEtBQUssQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDLENBQUM7b0JBQ2pELEtBQUssQ0FBQztnQkFDUixLQUFLLEtBQUs7b0JBQ1IsU0FBUyxHQUFHLEtBQUssQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLE1BQU0sRUFBRSxDQUFDLENBQUM7b0JBQ2pELEtBQUssQ0FBQztZQUNWLENBQUM7WUFDRCxJQUFJLElBQUksR0FBRyxLQUFLLENBQUMsT0FBTyxDQUFDLFNBQVMsRUFBRSxJQUFJLENBQUMsQ0FBQztZQUMxQyxJQUFJLFFBQVEsR0FBRyxJQUFJLENBQUMsTUFBTSxFQUFFLEdBQUcsR0FBRyxHQUFHLElBQUksQ0FBQyxHQUFHLEVBQUUsR0FBRyxPQUFPLEdBQUcsSUFBSSxDQUFDLFdBQVcsRUFBRSxDQUFDO1lBQy9FLEtBQUssQ0FBQyxZQUFZLENBQUMsSUFBSSxFQUFFLFFBQVEsQ0FBQyxDQUFDO1FBQ3JDLENBQUM7UUFBQSxJQUFJLENBQUMsQ0FBQztZQUNMLE1BQU0sSUFBSSxLQUFLLENBQUMsaUhBQWlILENBQUMsQ0FBQztRQUNySSxDQUFDO1FBQ0QsTUFBTSxDQUFDLElBQUksQ0FBQztJQUNkLENBQUM7SUFFRDs7Ozs7T0FLRztJQUNILHdDQUFvQixHQUFwQixVQUFxQixJQUFtQixFQUFFLFFBQWlCO1FBQTNELGlCQXFCQztRQXJCb0IscUJBQUEsRUFBQSxZQUFtQjtRQUN0QyxFQUFFLENBQUEsQ0FBQyxJQUFJLElBQUksQ0FBQyxNQUFNLENBQUMsR0FBRyxJQUFJLE1BQU0sQ0FBQyxXQUFXLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQztZQUMvQyxPQUFPLENBQUMsSUFBSSxDQUFDLDBCQUEwQixDQUFDLENBQUM7WUFDekMsSUFBSSxXQUFTLEdBQUcsRUFBRSxDQUFDO1lBQ25CLElBQUksQ0FBQyxXQUFXLENBQUMsVUFBQyxJQUFJO2dCQUNwQixNQUFNLENBQUMsQ0FBQyxJQUFJLENBQUMsV0FBVyxFQUFFLENBQUMsQ0FBQyxDQUFDO29CQUMzQixLQUFLLEtBQUs7d0JBQ1IsV0FBUyxHQUFHLEtBQUssQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUM7d0JBQ3hDLEtBQUssQ0FBQztvQkFDUixLQUFLLEtBQUs7d0JBQ1IsV0FBUyxHQUFHLEtBQUssQ0FBQyxlQUFlLENBQUMsSUFBSSxDQUFDLENBQUM7d0JBQ3hDLEtBQUssQ0FBQztnQkFDVixDQUFDO2dCQUNELElBQUksSUFBSSxHQUFHLEtBQUssQ0FBQyxPQUFPLENBQUMsV0FBUyxFQUFFLElBQUksQ0FBQyxDQUFDO2dCQUMxQyxJQUFJLFFBQVEsR0FBRyxLQUFJLENBQUMsTUFBTSxFQUFFLEdBQUcsR0FBRyxHQUFHLElBQUksQ0FBQyxHQUFHLEVBQUUsR0FBRyxPQUFPLEdBQUcsSUFBSSxDQUFDLFdBQVcsRUFBRSxDQUFDO2dCQUMvRSxLQUFLLENBQUMsWUFBWSxDQUFDLElBQUksRUFBRSxRQUFRLENBQUMsQ0FBQztnQkFDbkMsUUFBUSxDQUFDLElBQUksRUFBRSxJQUFJLENBQUMsQ0FBQztZQUN2QixDQUFDLENBQUMsQ0FBQTtRQUNKLENBQUM7UUFBQSxJQUFJLENBQUMsQ0FBQztZQUNMLFFBQVEsQ0FBQyxJQUFJLEtBQUssQ0FBQyxpSEFBaUgsQ0FBQyxDQUFDLENBQUM7UUFDekksQ0FBQztJQUNILENBQUM7SUFFRDs7Ozs7O09BTUc7SUFDSCx1QkFBRyxHQUFILFVBQUksUUFBa0QsRUFBRSxPQUFjLEVBQUUsVUFBa0I7UUFBdEYseUJBQUEsRUFBQSxXQUEwQixJQUFJLENBQUMsbUJBQW1CO1FBQ3BELEVBQUUsQ0FBQSxDQUFDLENBQUMsSUFBSSxDQUFDLGFBQWEsQ0FBQyxDQUFBLENBQUM7WUFDdEIsTUFBTSxJQUFJLEtBQUssQ0FBQyxzRUFBc0UsQ0FBQyxDQUFDO1FBQzFGLENBQUM7UUFFRCxFQUFFLENBQUEsQ0FBQyxVQUFVLENBQUMsQ0FBQSxDQUFDO1lBQ2IsT0FBTyxJQUFJLHFCQUFtQixVQUFVLE1BQUcsQ0FBQztRQUM5QyxDQUFDO1FBQ0QsSUFBTSxNQUFNLEdBQW1CLElBQUksQ0FBQyxtQkFBbUIsQ0FBQyxRQUFRLEVBQUUsT0FBTyxDQUFDLENBQUM7UUFDM0UsSUFBTSxJQUFJLEdBQTBCLElBQUksQ0FBQyxNQUFNLEVBQUUsQ0FBQztRQUNsRCxJQUFJLENBQUMsSUFBSSxDQUFDLE1BQU0sQ0FBQyxDQUFDO1FBQ2xCLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxPQUFPLENBQUMsSUFBSSxDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUMsU0FBUyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUM7UUFDbEUsTUFBTSxDQUFDLElBQUksQ0FBQztJQUNkLENBQUM7SUFFRDs7Ozs7OztPQU9HO0lBQ0gsNEJBQVEsR0FBUixVQUFTLFFBQWtELEVBQUUsT0FBYyxFQUFFLFVBQWlCLEVBQUUsUUFBaUI7UUFBakgsaUJBZ0JDO1FBaEJRLHlCQUFBLEVBQUEsV0FBMEIsSUFBSSxDQUFDLG1CQUFtQjtRQUN6RCxFQUFFLENBQUEsQ0FBQyxDQUFDLElBQUksQ0FBQyxhQUFhLENBQUMsQ0FBQSxDQUFDO1lBQ3RCLE1BQU0sQ0FBQyxRQUFRLENBQUMsSUFBSSxLQUFLLENBQUMsc0VBQXNFLENBQUMsQ0FBQyxDQUFDO1FBQ3JHLENBQUM7UUFFRCxFQUFFLENBQUEsQ0FBQyxVQUFVLENBQUMsQ0FBQSxDQUFDO1lBQ2IsT0FBTyxJQUFJLHFCQUFtQixVQUFVLE1BQUcsQ0FBQztRQUM5QyxDQUFDO1FBQ0QsSUFBTSxNQUFNLEdBQW1CLElBQUksQ0FBQyxtQkFBbUIsQ0FBQyxRQUFRLEVBQUUsT0FBTyxDQUFDLENBQUM7UUFFM0UsSUFBSSxDQUFDLFdBQVcsQ0FBQyxVQUFDLEdBQUcsRUFBRSxJQUFJO1lBQ3pCLEVBQUUsQ0FBQSxDQUFDLEdBQUcsQ0FBQztnQkFBQyxNQUFNLENBQUMsUUFBUSxDQUFDLEdBQUcsQ0FBQyxDQUFDO1lBRTdCLElBQUksQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUM7WUFDbEIsS0FBSSxDQUFDLGdCQUFnQixDQUFDLE9BQU8sQ0FBQyxLQUFJLENBQUMsT0FBTyxFQUFFLElBQUksQ0FBQyxTQUFTLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLENBQUMsS0FBSyxDQUFDLFFBQVEsQ0FBQyxDQUFDO1FBQ25HLENBQUMsQ0FBQyxDQUFDO0lBQ0wsQ0FBQztJQUVEOzs7O09BSUc7SUFDSCx5QkFBSyxHQUFMLFVBQU0sT0FBYztRQUNsQixNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsS0FBSyxFQUFFLE9BQU8sQ0FBQyxDQUFDO0lBQ2pELENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILDhCQUFVLEdBQVYsVUFBVyxPQUFjLEVBQUUsUUFBaUI7UUFDMUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsS0FBSyxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDL0QsQ0FBQztJQUNEOzs7O09BSUc7SUFDSCx3QkFBSSxHQUFKLFVBQUssT0FBYztRQUNqQixNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQyxDQUFDO0lBQ2hELENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILDZCQUFTLEdBQVQsVUFBVSxPQUFjLEVBQUUsUUFBaUI7UUFDekMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsSUFBSSxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDOUQsQ0FBQztJQUNEOzs7O09BSUc7SUFDSCx5QkFBSyxHQUFMLFVBQU0sT0FBYztRQUNsQixNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsS0FBSyxFQUFFLE9BQU8sQ0FBQyxDQUFDO0lBQ2pELENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILDhCQUFVLEdBQVYsVUFBVyxPQUFjLEVBQUUsUUFBaUI7UUFDMUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsS0FBSyxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDL0QsQ0FBQztJQUNEOzs7O09BSUc7SUFDSCwyQkFBTyxHQUFQLFVBQVEsT0FBYztRQUNwQixNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsT0FBTyxFQUFFLE9BQU8sQ0FBQyxDQUFDO0lBQ25ELENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILGdDQUFZLEdBQVosVUFBYSxPQUFjLEVBQUUsUUFBaUI7UUFDNUMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsT0FBTyxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDakUsQ0FBQztJQUNEOzs7O09BSUc7SUFDSCx3QkFBSSxHQUFKLFVBQUssT0FBYztRQUNqQixNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsSUFBSSxFQUFFLE9BQU8sQ0FBQyxDQUFDO0lBQ2hELENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILDZCQUFTLEdBQVQsVUFBVSxPQUFjLEVBQUUsUUFBaUI7UUFDekMsSUFBSSxDQUFDLFFBQVEsQ0FBQyxjQUFjLENBQUMsSUFBSSxFQUFFLE9BQU8sRUFBRSxJQUFJLEVBQUUsUUFBUSxDQUFDLENBQUM7SUFDOUQsQ0FBQztJQUNEOzs7OztPQUtHO0lBQ0gseUJBQUssR0FBTCxVQUFNLE9BQWMsRUFBRSxVQUFrQjtRQUN0QyxNQUFNLENBQUMsSUFBSSxDQUFDLEdBQUcsQ0FBQyxjQUFjLENBQUMsS0FBSyxFQUFFLE9BQU8sRUFBRSxVQUFVLENBQUMsQ0FBQztJQUM3RCxDQUFDO0lBQ0Q7Ozs7OztPQU1HO0lBQ0gsOEJBQVUsR0FBVixVQUFXLE9BQWMsRUFBRSxVQUFpQixFQUFFLFFBQWlCO1FBQzdELElBQUksQ0FBQyxRQUFRLENBQUMsY0FBYyxDQUFDLEtBQUssRUFBRSxPQUFPLEVBQUUsVUFBVSxFQUFFLFFBQVEsQ0FBQyxDQUFDO0lBQ3JFLENBQUM7SUFDRDs7Ozs7T0FLRztJQUNILDJCQUFPLEdBQVAsVUFBUSxPQUFjLEVBQUUsVUFBa0I7UUFDeEMsTUFBTSxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsY0FBYyxDQUFDLE9BQU8sRUFBRSxPQUFPLEVBQUUsVUFBVSxDQUFDLENBQUM7SUFDL0QsQ0FBQztJQUNEOzs7Ozs7T0FNRztJQUNILGdDQUFZLEdBQVosVUFBYSxPQUFjLEVBQUUsVUFBaUIsRUFBRSxRQUFpQjtRQUMvRCxJQUFJLENBQUMsUUFBUSxDQUFDLGNBQWMsQ0FBQyxPQUFPLEVBQUUsT0FBTyxFQUFFLFVBQVUsRUFBRSxRQUFRLENBQUMsQ0FBQztJQUN2RSxDQUFDO0lBNEJEOzs7Ozs7T0FNRztJQUNLLHVDQUFtQixHQUEzQixVQUE0QixRQUFrRCxFQUFFLE9BQWM7UUFBbEUseUJBQUEsRUFBQSxXQUEwQixJQUFJLENBQUMsbUJBQW1CO1FBQzVFLElBQUksTUFBTSxHQUFHLElBQUksZUFBZSxDQUFDLGNBQWMsQ0FBQyxRQUFRLENBQUMsRUFBRSxPQUFPLEVBQUUsSUFBSSxDQUFDLE9BQU8sRUFBRSxJQUFJLENBQUMsV0FBVyxDQUFDLENBQUM7UUFDcEcsTUFBTSxDQUFDLE1BQU0sQ0FBQztJQUNoQixDQUFDO0lBRUgsZ0JBQUM7QUFBRCxDQUFDLEFBcGFELElBb2FDO0FBcGFZLDhCQUFTO0FBdWF0Qjs7R0FFRztBQUNIO0lBK0JFOzs7OztPQUtHO0lBQ0gseUJBQVksTUFBYSxFQUFFLFFBQWUsRUFBRSxJQUFZLEVBQUUsUUFBdUI7UUFDL0UsSUFBTSxFQUFFLEdBQUcsSUFBSSxDQUFDLEdBQUcsRUFBRSxDQUFDO1FBQ3RCLElBQU0sR0FBRyxHQUFHLElBQUksSUFBSSxDQUFDLEVBQUUsQ0FBQyxDQUFDO1FBQ3pCLElBQUksQ0FBQyxTQUFTLEdBQUcsRUFBRSxDQUFDO1FBQ3BCLElBQUksQ0FBQyxJQUFJLEdBQUcsR0FBRyxDQUFDLGNBQWMsRUFBRSxDQUFDO1FBQ2pDLElBQUksQ0FBQyxLQUFLLEdBQUcsTUFBTSxDQUFDO1FBQ3BCLElBQUksQ0FBQyxPQUFPLEdBQUcsUUFBUSxDQUFDO1FBQ3hCLEVBQUUsQ0FBQSxDQUFDLElBQUksQ0FBQztZQUFDLElBQUksQ0FBQyxHQUFHLEdBQUcsSUFBSSxDQUFDO1FBQ3pCLEVBQUUsQ0FBQSxDQUFDLFFBQVEsQ0FBQztZQUFDLElBQUksQ0FBQyxPQUFPLEdBQUcsUUFBUSxDQUFDO0lBQ3ZDLENBQUM7SUFDSCxzQkFBQztBQUFELENBQUMsQUEvQ0QsSUErQ0M7QUEvQ1ksMENBQWU7QUFpRDVCOztHQUVHO0FBQ0gsSUFBWSxjQVFYO0FBUkQsV0FBWSxjQUFjO0lBQ3hCLHFEQUFLLENBQUE7SUFDTCxxREFBSyxDQUFBO0lBQ0wseURBQU8sQ0FBQTtJQUNQLG1EQUFJLENBQUE7SUFDSixtREFBSSxDQUFBO0lBQ0oscURBQUssQ0FBQTtJQUNMLHlEQUFPLENBQUE7QUFDVCxDQUFDLEVBUlcsY0FBYyxHQUFkLHNCQUFjLEtBQWQsc0JBQWMsUUFRekI7QUFFRDs7R0FFRztBQUNIO0lBQUE7UUFDRTs7OztXQUlHO1FBQ0gsbUJBQWMsR0FBVyxJQUFJLENBQUM7UUFDOUI7Ozs7V0FJRztRQUNILFlBQU8sR0FBVyxLQUFLLENBQUM7UUFDeEI7Ozs7V0FJRztRQUNILFlBQU8sR0FBaUIsQ0FBQyxDQUFDO1FBQzFCOzs7O1dBSUc7UUFDSCxvQkFBZSxHQUFrQixjQUFjLENBQUMsS0FBSyxDQUFDO0lBT3hELENBQUM7SUFBRCx1QkFBQztBQUFELENBQUMsQUEvQkQsSUErQkM7QUEvQlksNENBQWdCO0FBaUM3Qjs7R0FFRztBQUNIO0lBQUE7SUFrRkEsQ0FBQztJQWpGQzs7O09BR0c7SUFDSSx3QkFBa0IsR0FBekIsVUFBMEIsT0FBVztRQUNuQyxNQUFNLENBQUMsU0FBUyxJQUFJLE9BQU8sSUFBSSxTQUFTLElBQUksT0FBTyxDQUFDO0lBQ3RELENBQUM7SUFDRDs7OztPQUlHO0lBQ0kscUJBQWUsR0FBdEIsVUFBdUIsR0FBYztRQUNuQyxJQUFJLFNBQVMsR0FBRyxFQUFFLENBQUM7UUFDbkIsRUFBRSxDQUFBLENBQUMsQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDO1lBQUMsTUFBTSxDQUFDLFNBQVMsQ0FBQztRQUNqQyxTQUFTLElBQUksTUFBTSxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLEdBQUcsSUFBSSxDQUFDO1FBQ2xELEdBQUcsQ0FBQyxPQUFPLENBQUMsVUFBQyxHQUFHO1lBQ2QsU0FBUyxJQUFJLE1BQU0sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUMsR0FBRyxDQUFDLFVBQUEsR0FBRyxJQUFJLE9BQUEsR0FBRyxDQUFDLEdBQUcsQ0FBQyxFQUFSLENBQVEsQ0FBQyxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsR0FBRyxJQUFJLENBQUM7UUFDdEUsQ0FBQyxDQUFDLENBQUM7UUFDSCxNQUFNLENBQUMsU0FBUyxDQUFDO0lBQ25CLENBQUM7SUFDRDs7OztPQUlHO0lBQ0kscUJBQWUsR0FBdEIsVUFBdUIsR0FBYztRQUNuQyxJQUFJLFNBQVMsR0FBRyxFQUFFLENBQUM7UUFDbkIsRUFBRSxDQUFBLENBQUMsQ0FBQyxHQUFHLENBQUMsTUFBTSxDQUFDO1lBQUMsTUFBTSxDQUFDLFNBQVMsQ0FBQztRQUNqQyxTQUFTLElBQUksTUFBTSxDQUFDLElBQUksQ0FBQyxHQUFHLENBQUMsQ0FBQyxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLEdBQUcsSUFBSSxDQUFDO1FBQ25ELEdBQUcsQ0FBQyxPQUFPLENBQUMsVUFBQyxHQUFHO1lBQ2QsU0FBUyxJQUFJLE1BQU0sQ0FBQyxJQUFJLENBQUMsR0FBRyxDQUFDLENBQUMsR0FBRyxDQUFDLFVBQUEsR0FBRyxJQUFJLE9BQUEsR0FBRyxDQUFDLEdBQUcsQ0FBQyxFQUFSLENBQVEsQ0FBQyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsR0FBRyxJQUFJLENBQUM7UUFDdkUsQ0FBQyxDQUFDLENBQUM7UUFDSCxNQUFNLENBQUMsU0FBUyxDQUFDO0lBQ25CLENBQUM7SUFDRDs7Ozs7T0FLRztJQUNJLGFBQU8sR0FBZCxVQUFlLE9BQWMsRUFBRSxJQUFtQjtRQUFuQixxQkFBQSxFQUFBLFlBQW1CO1FBQ2hELElBQUksSUFBUyxDQUFDO1FBQ2QsSUFBSSxJQUFJLEdBQUcsWUFBWSxDQUFDO1FBQ3hCLE1BQU0sQ0FBQyxDQUFDLElBQUksQ0FBQyxXQUFXLEVBQUUsQ0FBQyxDQUFBLENBQUM7WUFDMUIsS0FBSyxLQUFLO2dCQUFFLElBQUksR0FBRyxVQUFVLENBQUM7Z0JBQzFCLEtBQUssQ0FBQztRQUNaLENBQUM7UUFDRCxJQUFJLEdBQUcsSUFBSSxJQUFJLENBQUMsQ0FBQyxRQUFRLEVBQUUsT0FBTyxDQUFDLEVBQUUsRUFBQyxJQUFJLEVBQUUsSUFBSSxFQUFDLENBQUMsQ0FBQztRQUNuRCxNQUFNLENBQUMsSUFBSSxDQUFDO0lBQ2QsQ0FBQztJQUNEOzs7O09BSUc7SUFDSSxrQkFBWSxHQUFuQixVQUFvQixJQUFTLEVBQUUsUUFBZTtRQUM1Qyw2RkFBNkY7UUFDN0YsSUFBSSxNQUFNLEdBQUcsSUFBSSxVQUFVLEVBQUUsQ0FBQztRQUM5QixJQUFJLElBQUksQ0FBQztRQUNULE1BQU0sQ0FBQyxNQUFNLEdBQUcsVUFBVSxLQUFLO1lBQzdCLElBQUksR0FBRyxRQUFRLENBQUMsYUFBYSxDQUFDLEdBQUcsQ0FBQyxDQUFDO1lBQ25DLElBQUksQ0FBQyxJQUFJLEdBQUcsS0FBSyxDQUFDLE1BQU0sQ0FBQyxRQUFRLENBQUMsQ0FBQztZQUNuQyxJQUFJLENBQUMsTUFBTSxHQUFHLFFBQVEsQ0FBQztZQUN2QixJQUFJLENBQUMsUUFBUSxHQUFHLFFBQVEsQ0FBQztZQUN6QixJQUFJLFNBQVMsQ0FBQztZQUNkLElBQUksQ0FBQztnQkFDSCxTQUFTLEdBQUcsSUFBSSxVQUFVLENBQUMsT0FBTyxFQUFFO29CQUNsQyxNQUFNLEVBQUUsTUFBTTtvQkFDZCxTQUFTLEVBQUUsSUFBSTtvQkFDZixZQUFZLEVBQUUsSUFBSTtpQkFDbkIsQ0FBQyxDQUFDO1lBQ0wsQ0FBQztZQUFDLEtBQUssQ0FBQyxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7Z0JBQ1gsU0FBUyxHQUFHLFFBQVEsQ0FBQyxXQUFXLENBQUMsWUFBWSxDQUFDLENBQUM7Z0JBQy9DLFNBQVMsQ0FBQyxTQUFTLENBQUMsT0FBTyxFQUFFLElBQUksRUFBRSxJQUFJLENBQUMsQ0FBQztZQUMzQyxDQUFDO1lBQ0QsSUFBSSxDQUFDLGFBQWEsQ0FBQyxTQUFTLENBQUMsQ0FBQztZQUM5QixDQUFDLE1BQU0sQ0FBQyxHQUFHLElBQUksTUFBTSxDQUFDLFdBQVcsQ0FBQyxDQUFDLENBQUMsZUFBZSxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsQ0FBQztRQUNqRSxDQUFDLENBQUM7UUFDRixNQUFNLENBQUMsYUFBYSxDQUFDLElBQUksQ0FBQyxDQUFDO0lBQzdCLENBQUM7SUFDSCxZQUFDO0FBQUQsQ0FBQyxBQWxGRCxJQWtGQyJ9
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibG9nZ2VyYWdlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vc3JjL2xvZ2dlcmFnZS50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiO0FBQUEscUNBQXFDOztBQUVyQzs7O0dBR0c7QUFDSCwrQkFBaUM7QUFDakMsc0NBQXdDO0FBQ3hDLHVDQUFzQztBQUN0QywrREFBNkQ7QUFDN0QseURBQXVEO0FBd2FuQywyQkF4YVgsb0NBQWdCLENBd2FXO0FBdmFwQyx1REFBcUQ7QUF1YWYsMEJBdmE3QixrQ0FBZSxDQXVhNkI7QUF0YXJELHFEQUFtRDtBQXNhSSx5QkF0YTlDLGdDQUFjLENBc2E4QztBQTVackU7O0dBRUc7QUFDSDtJQUNFOzs7O09BSUc7SUFDSCxtQkFBWSxHQUFVO1FBQUUsY0FBYTthQUFiLFVBQWEsRUFBYixxQkFBYSxFQUFiLElBQWE7WUFBYiw2QkFBYTs7UUFpWXJDOztXQUVHO1FBQ0ssaUJBQVksR0FBVyxLQUFLLENBQUM7UUFuWW5DLElBQUksT0FBTyxHQUFHLElBQUksb0NBQWdCLEVBQUUsQ0FBQztRQUVyQyxFQUFFLENBQUEsQ0FBQyxJQUFJLENBQUMsTUFBTSxJQUFJLE9BQU8sSUFBSSxDQUFDLENBQUMsQ0FBQyxLQUFLLFFBQVEsQ0FBQyxDQUFBLENBQUM7WUFDN0MsT0FBTyxHQUFHLE1BQU0sQ0FBQyxPQUFPLEVBQUUsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDLENBQUM7UUFDckMsQ0FBQztRQUFBLElBQUksQ0FBQyxFQUFFLENBQUEsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLENBQUEsQ0FBQztZQUNwQixPQUFPLENBQUMsSUFBSSxDQUNWLE1BQU0sQ0FBQyxNQUFNLENBQUMsbUlBQW1JLENBQUMsQ0FBQyxDQUFDO1lBQ3RKLE9BQU8sQ0FBQyxlQUFlLEdBQUcsSUFBSSxDQUFDLENBQUMsQ0FBQyxDQUFDO1lBQ2xDLE9BQU8sQ0FBQyxPQUFPLEdBQUcsSUFBSSxDQUFDLENBQUMsQ0FBQyxJQUFJLENBQUMsQ0FBQztR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

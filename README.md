@@ -43,7 +43,7 @@ const logger = new Loggerage("MY-APP");
 logger.debug("Hello world!");
 ```
 
-First parameter is the name to identify our application at the localStorage, it means it has to be unique for the logger. This construction will use the default 'localStorage'. [See constructor explanation](#constructor) for more options
+First parameter is the name to identify our application, it means it has to be unique for the logger. This construction will use the default 'localStorage'. [See constructor explanation](#constructor) for more options
 
 So the logger gives back most of the methods, we can chain calls (chaining) in sync methods:
 
@@ -78,9 +78,6 @@ const logger = new Loggerage("MY-APP", options);
 `LoggerageOptions` is really a plain object, then, out of 'typescript' scope, you can do this:
 
 ```javascript
-const { Loggerage, LoggerageLevel } = require("loggerage");
-const myStorage = require('./my-storage');
-
 const logger = new Loggerage("MY-APP", {
     version: '1.0',
     defaultLogLevel: LoggerageLevel.INFO,
@@ -90,7 +87,7 @@ const logger = new Loggerage("MY-APP", {
 
 * <a name="old-constructor"></a>**OLD Constructor**:
 
-__The old constructor is deprecated__, but is supported at the moment. From version 2 this will not be supported.
+**The old constructor is deprecated**, but is supported at the moment. From version 2 this will not be supported.
 
 ```javascript
 const { Loggerage, LoggerageLevel } = require("loggerage");
@@ -102,19 +99,23 @@ const logger = new Loggerage("MY-APP", LoggerageLevel.INFO, 2);
 
 ### <a name="setstorage"></a>.setStorage( *otherStorage* ) : *Loggerage*
 
-We can indicate a different storage other than the default one. This new storage must implement `getItem` and `setItem` methods of Storage interface at the [Web API Storage](https://developer.mozilla.org/en-US/docs/Web/API/Storage). Example:
+We can indicate a different storage other than the default one. This new storage must implement the next interface:
 
 ```javascript
-const myNewStorage = {
-    getItem:    function( keyName ){ /* ... */ }, // remember, return only string type
-    setItem:    function( keyName, keyValue ){ /* ... */ } // remember, accept only string type
-};
-logger.setStorage(myNewStorage);
+// file: 'src/storage-interface.ts'
+
+interface Storage {
+  getItem(key:string): Array<LoggerageObject> | Promise<Array<LoggerageObject>>
+  setItem(key:string, value:LoggerageObject): void | Promise<void>
+  clear(): void | Promise<void>
+}
+
+// 'key' is the name of app or logger, indicated in constructor
 ```
 
-**IMPORTANT**: loggerage always expected that these methods accept and return ONLY string type, like the default localStorage. In get and set methods, it will be used `JSON.parse` and `JSON.stringify` respectively.
+It's similar to [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Storage), but not working with strings in the return of `getItem` and second parameter of `setItem`.
 
-This method returns the Loggerage object itself.
+**IMPORTANT**: We recommend returning a promise when we are going to work with [asynchronous methods](#async) of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by `Promise.resolve` always.
 
 ### <a name="getversion"></a>.getVersion( ) : *number*
 
@@ -149,6 +150,8 @@ Get actual silence console logs.
 Returns the actual log saved at storage in an LoggerageObject Array, like this:
 
 ```javascript
+// file: src/loggerage-object.ts
+
 LoggerageObject = {
     app: string,            // app or logger name
     version: number|string, // app or logger version
@@ -247,11 +250,15 @@ Logs a message with given level asynchronously. Concats stacktrace to message if
 
 ## <a name="loggerageoptions"></a>LoggerageOptions
 
+```javascript
+// file: src/loggerage-options.ts
+```
+
 Property | Type | Default | Description
 --- | --- | --- | ---
 isLocalStorage | `boolean` | `true` | Indicate if storage is the default localStorage
 silence | `boolean` | `false` | If true, will not be displayed console logs
-version | `number \| string` | `1` | Version logger/application
+version | `number or string` | `1` | Version logger/application
 defaultLogLevel | `LoggerageLevel` | `LoggerageLevel.DEBUG` | Default level log
 storage | `object` | `null` | Our own storage, instead default localStorage. If set, `isLocalStorage` property set to false automatically
 
@@ -267,7 +274,7 @@ logger.getLogAsync((err, log) => {
 });
 ```
 
-**IMPORTANT**: Async methods assume that `getItem` and `setItem` methods of Storage, returns a Promise, **always**.
+**IMPORTANT**: We recommend returning a promise in storage methods when we are going to work with [asynchronous methods](#async) of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by `Promise.resolve` always.
 
 ## <a name="async-to-promises"></a>Convert async methods to Promises
 
@@ -275,13 +282,12 @@ All async methods are promisifables, this means that, with the help of libraries
 
 ```javascript
 const promisify = require('promisify-node');
-const { Loggerage, LoggerageLevel } = require("loggerage");
+const { Loggerage } = require("loggerage");
 
-const logger = new Loggerage("MY-APP", LoggerageLevel.INFO, 2);
+const logger = new Loggerage("MY-APP");
+logger.infoAsync = promisify(logger.infoAsync);
 
-logger.debugAsync = promisify(logger.debugAsync);
-
-logger.debugAsync("Hello world!").then(() => {
+logger.infoAsync("Hello world!").then(() => {
   // OK!
 }).catch((err) => {
   // KO
@@ -293,8 +299,6 @@ logger.debugAsync("Hello world!").then(() => {
 If you want to contribute, [check this](CONTRIBUTING.md)
 
 ## <a name="run-test"></a>Run test
-
-It's assumed that [`tsc`](https://www.typescriptlang.org/index.html#download-links) is installed
 
 ```bash
 $ npm install && npm test
