@@ -6,12 +6,13 @@ import { Storage } from './storage-interface';
  * Loggerage class
  */
 declare class Loggerage {
+    private _options;
     /**
      * Constructor for Loggerage
      * @param app    App or Logger name
      * @param rest   Optional parameters
      */
-    constructor(app: string, ...rest: any[]);
+    constructor(app: string, options?: LoggerageOptions);
     /**
      * Set your own Storage
      * @param otherStorage        Your Storage that implement Storage interface [https://developer.mozilla.org/en-US/docs/Web/API/Storage]
@@ -202,23 +203,10 @@ declare class Loggerage {
      * @returns {void}
      */
     failureAsync(message: string, stacktrace: string, callback: (error: Error | void) => void): void;
-    private _storage;
     /**
      * App name for localStorage
      */
     private _app;
-    /**
-     * If true, will not be displayed console logs
-     */
-    private _silence;
-    /**
-     * Version number for this app log
-     */
-    private _version;
-    /**
-     * Default log level
-     */
-    private _defaultLogLevel;
     /**
      * Indicate if localStorage is ok (false by default)
      */

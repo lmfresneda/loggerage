@@ -24,43 +24,33 @@ declare var global: any;
  * Loggerage class
  */
 class Loggerage {
+  private _options:LoggerageOptions;
   /**
    * Constructor for Loggerage
    * @param app    App or Logger name
    * @param rest   Optional parameters
    */
-  constructor(app:string, ...rest:any[]){
-    let options = new LoggerageOptions();
+  constructor(app:string, options?:LoggerageOptions){
+    this._options = new LoggerageOptions();
 
-    if(rest.length && typeof rest[0] === 'object'){
-      options = assign(options, rest[0]);
-    }else if(rest.length){
-      console.warn(
-        colors.yellow('WARN: Remember, the old constructor is deprecated. See [https://github.com/lmfresneda/loggerage#new-constructor] for more details'));
-      options.defaultLogLevel = rest[0];
-      options.version = rest[1] || 1;
-    }
-    var storage = options.storage;
-    if(!storage && options.isLocalStorage){
-      try{ if(window.localStorage) storage = new WrapLocalStorage(window.localStorage);
+    if(options) this._options = assign(this._options, options);
+
+    if(!this._options.storage && this._options.isLocalStorage){
+      try{ if(window.localStorage) this._options.storage = new WrapLocalStorage(window.localStorage);
       } catch (e) {
         if(e.message !== 'window is not defined') throw e;
-        try{ if(global.localStorage) storage = new WrapLocalStorage(global.localStorage);
+        try{ if(global.localStorage) this._options.storage = new WrapLocalStorage(global.localStorage);
         } catch (e) { if(e.message !== 'global is not defined') throw e; }
       }
     }
 
-    if(storage){
-      this._storage = storage;
+    if(this._options.storage){
       this._isStorageOk = true;
-    }else if(!options.silence){
+    }else if(!this._options.silence){
       console.warn(
         colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\''));
     }
-    this._silence = options.silence;
     this._app = app;
-    this._version = options.version;
-    this._defaultLogLevel = options.defaultLogLevel;
   }
 
   /**
@@ -69,7 +59,7 @@ class Loggerage {
    * @returns {Loggerage}
    */
   setStorage(storage:Storage):Loggerage {
-    this._storage = storage;
+    this._options.storage = storage;
     this._isStorageOk = true;
     return this;
   }
@@ -78,7 +68,7 @@ class Loggerage {
    * Return the app version
    * @returns {number}
    */
-  getVersion():number|string { return this._version; }
+  getVersion():number|string { return this._options.version; }
 
   /**
    * Return the app name for localStorage
@@ -92,7 +82,7 @@ class Loggerage {
    * @returns {Loggerage}
    */
   setDefaultLogLevel(defaultLogLevel:LoggerageLevel):Loggerage {
-    this._defaultLogLevel = defaultLogLevel;
+    this._options.defaultLogLevel = defaultLogLevel;
     return this;
   }
 
@@ -101,7 +91,7 @@ class Loggerage {
    * @returns {string}
    */
   getDefaultLogLevel():string {
-    return LoggerageLevel[this._defaultLogLevel];
+    return LoggerageLevel[this._options.defaultLogLevel];
   }
 
   /**
@@ -109,7 +99,7 @@ class Loggerage {
    * @returns {number}
    */
   getDefaultLogLevelNumber():number {
-    return this._defaultLogLevel;
+    return this._options.defaultLogLevel;
   }
 
   /**
@@ -118,7 +108,7 @@ class Loggerage {
    * @returns {Loggerage}
    */
   setSilence(silence:boolean):Loggerage {
-    this._silence = silence;
+    this._options.silence = silence;
     return this;
   }
 
@@ -127,7 +117,7 @@ class Loggerage {
    * @returns {boolean}
    */
   getSilence():boolean {
-    return this._silence;
+    return this._options.silence;
   }
 
   /**
@@ -135,7 +125,7 @@ class Loggerage {
    * @returns {LoggerageObject[]}
    */
   getLog():LoggerageObject[]{
-    const logs = this._storage.getItem(this._app) as LoggerageObject[];
+    const logs = this._options.storage.getItem(this._app) as LoggerageObject[];
     return logs;
   }
 
@@ -145,7 +135,7 @@ class Loggerage {
    * @returns {void}
    */
   getLogAsync(callback:(error:Error, data?:LoggerageObject[]) => void):void{
-    Promise.resolve(this._storage.getItem(this._app)).then((data) => {
+    Promise.resolve(this._options.storage.getItem(this._app)).then((data) => {
       const logs:LoggerageObject[] = data;
       callback(null, data);
     }).catch((err) => {
@@ -158,7 +148,7 @@ class Loggerage {
    * @returns {Loggerage}
    */
   clearLog():Loggerage {
-    this._storage.clear();
+    this._options.storage.clear();
     return this;
   }
 
@@ -168,7 +158,7 @@ class Loggerage {
    * @returns {void}
    */
   clearLogAsync(callback:(error:Error|void) => void):void {
-    Promise.resolve(this._storage.clear()).then(callback).catch(callback);
+    Promise.resolve(this._options.storage.clear()).then(callback).catch(callback);
   }
 
   /**
@@ -235,7 +225,7 @@ class Loggerage {
    * @param stacktrace [optional]
    * @returns {Loggerage}
    */
-  log(logLevel:LoggerageLevel = this._defaultLogLevel, message:string, stacktrace?:string):Loggerage {
+  log(logLevel:LoggerageLevel = this._options.defaultLogLevel, message:string, stacktrace?:string):Loggerage {
     if(!this._isStorageOk){
       throw new Error('localStorage not found. Set your Storage by \'.setStorage() method\'');
     }
@@ -244,7 +234,7 @@ class Loggerage {
       message += `\n[Stack Trace: ${stacktrace}]`;
     }
     const logObj:LoggerageObject = this._makeLoggerageObject(logLevel, message);
-    this._storage.setItem(this._app, logObj);
+    this._options.storage.setItem(this._app, logObj);
     return this;
   }
 
@@ -256,7 +246,7 @@ class Loggerage {
    * @param callback    Is a function that recived one param, an error if occurs, otherwise this param is null.
    * @returns {void}
    */
-  logAsync(logLevel:LoggerageLevel = this._defaultLogLevel, message:string, stacktrace:string, callback:(error:Error|void) => void):void {
+  logAsync(logLevel:LoggerageLevel = this._options.defaultLogLevel, message:string, stacktrace:string, callback:(error:Error|void) => void):void {
     if(!this._isStorageOk){
       return callback(new Error('localStorage not found. Set your Storage by \'.setStorage() method\''));
     }
@@ -266,7 +256,7 @@ class Loggerage {
     }
     const logObj:LoggerageObject = this._makeLoggerageObject(logLevel, message);
 
-    Promise.resolve(this._storage.setItem(this._app, logObj)).then(callback).catch(callback);
+    Promise.resolve(this._options.storage.setItem(this._app, logObj)).then(callback).catch(callback);
   }
 
   /**
@@ -397,23 +387,10 @@ class Loggerage {
   //      PRIVATE      //
   //                   //
 
-  private _storage:Storage;
   /**
    * App name for localStorage
    */
   private _app:string;
-  /**
-   * If true, will not be displayed console logs
-   */
-  private _silence:boolean;
-  /**
-   * Version number for this app log
-   */
-  private _version:number|string;
-  /**
-   * Default log level
-   */
-  private _defaultLogLevel:LoggerageLevel;
   /**
    * Indicate if localStorage is ok (false by default)
    */
@@ -426,8 +403,8 @@ class Loggerage {
    * @private
    * @returns {LoggerageObject}
    */
-  private _makeLoggerageObject(logLevel:LoggerageLevel = this._defaultLogLevel, message:string):LoggerageObject {
-    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this._app, this._version);
+  private _makeLoggerageObject(logLevel:LoggerageLevel = this._options.defaultLogLevel, message:string):LoggerageObject {
+    let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this._app, this._options.version);
     return logObj;
   }
 }

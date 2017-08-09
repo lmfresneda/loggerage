@@ -23,34 +23,7 @@ describe("Loggerage", function() {
     i += 1;
   });
 
-  describe("Test OLD constructor", function () {
-    it("app is equal to (Date.now() + i)", function() {
-      const app = Date.now() + i;
-      i += 1;
-      logger = new Loggerage(app, LoggerageLevel.INFO);
-      asyncLogger = getAsyncLogger(app, LoggerageLevel.INFO);
-      expect(logger.getApp()).to.equal(app);
-      expect(asyncLogger.getApp()).to.equal(app);
-    });
-
-    it("log level is equal to INFO", function() {
-      logger = new Loggerage(Date.now() + i, LoggerageLevel.INFO);
-      asyncLogger = getAsyncLogger(Date.now() + i, LoggerageLevel.INFO);
-      i += 1;
-      expect(logger.getDefaultLogLevel()).to.equal("INFO");
-      expect(asyncLogger.getDefaultLogLevel()).to.equal("INFO");
-    });
-
-    it("version is equal to 2", function() {
-      logger = new Loggerage(Date.now() + i, LoggerageLevel.INFO, 2);
-      asyncLogger = getAsyncLogger(Date.now() + i, LoggerageLevel.INFO, 2);
-      i += 1;
-      expect(logger.getVersion()).to.equal(2);
-      expect(asyncLogger.getVersion()).to.equal(2);
-    });
-  });
-
-  describe("Test NEW constructor", function () {
+  describe("Test constructor", function () {
     it("app is equal to (Date.now() + i)", function() {
       const app = Date.now() + i;
       i += 1;
