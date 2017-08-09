@@ -259,7 +259,7 @@ Logs a message with ERROR level. Concats `stacktrace` to message if stacktrace e
 
 ### <a name="errorasync"></a>.errorAsync( *message, stacktrace, callback* ) : *void*
 
-Logs a message with ERROR level asynchronously. Concats stacktrace to message if `stacktrace` exists, which can be null.
+Logs a message with ERROR level asynchronously. Concats stacktrace to message. `stacktrace` is required.
 
 ### <a name="failure"></a>.failure( *message[, stacktrace]* ) : *Loggerage*
 
@@ -267,7 +267,7 @@ Logs a message with FAILURE level. Concats stacktrace to message if `stacktrace`
 
 ### <a name="failureasync"></a>.failureAsync( *message, stacktrace, callback* ) : *void*
 
-Logs a message with FAILURE level asynchronously. Concats stacktrace to message if `stacktrace` exists, which can be null.
+Logs a message with FAILURE level asynchronously. Concats stacktrace to message. `stacktrace` is required.
 
 ### <a name="log"></a>.log( *logLevel, message[, stacktrace]* ) : *Loggerage*
 
