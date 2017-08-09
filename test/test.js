@@ -7,7 +7,7 @@ const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 const LoggerageOptions = require("../build/loggerage").LoggerageOptions;
 const WrapLocalStorage = require("../build/utils/wrap-localstorage").WrapLocalStorage;
 const AsyncStorage = require('./async-storage');
-const asyncStorage = new AsyncStorage();
+const SyncStorage = require('./sync-storage');
 
 const consoleWarn = console.warn;
 console.warn = function(){};
@@ -111,15 +111,7 @@ describe("Loggerage", function() {
 
     it("with own storage in constructor, has 1 log", function() {
       const options = new LoggerageOptions();
-      options.storage = {
-        data: [],
-        getItem: function(key) {
-          return this.data;
-        },
-        setItem: function(key, value) {
-          this.data.push(value);
-        }
-      };
+      options.storage = new SyncStorage();
       logger = new Loggerage(Date.now() + i, options);
       i += 1;
       logger.info("One log");
@@ -350,6 +342,15 @@ describe("Loggerage", function() {
         expect(data[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
       }).catch(console.error);
     });
+
+    it("(Async) call async methods with sync storage", function() {
+      asyncLogger.setStorage(new SyncStorage);
+      asyncLogger.infoAsync("One async log").then(function(){
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(1);
+      }).catch(console.error);
+    });
   });
 
   describe("Without Blob", function () {
@@ -375,7 +376,7 @@ describe("Loggerage", function() {
       expect(function() {
         _logger.info("One log");
       }).to.throwException('localStorage not found. Set your Storage by \'.setStorage() method\'');
-      _logger.setStorage(new WrapLocalStorage(localStorage));
+      _logger.setStorage(new SyncStorage());
       _logger.info("One log");
       const log = _logger.getLog();
       global.localStorage = localStorage;
@@ -386,10 +387,8 @@ describe("Loggerage", function() {
 });
 
 
-function getAsyncLogger(app, level, version){
-  level = level || LoggerageLevel.DEBUG;
-  version = version || 1;
-  const asyncLogger = new Loggerage(app, level, version);
+function getAsyncLogger(app){
+  const asyncLogger = new Loggerage(app);
   asyncLogger.setStorage(new AsyncStorage());
   asyncLogger.getLogAsync = promisify(asyncLogger.getLogAsync);
   asyncLogger.infoAsync = promisify(asyncLogger.infoAsync);

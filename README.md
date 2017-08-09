@@ -6,9 +6,7 @@ loggerage is a Javascript logger who saves the register directly on localStorage
 
 * [How to use](#how-to-use)
 * [API](#api)
-    * [Constructors](#constructor)
-        * [new constructor (recomended)](#new-constructor)
-        * [old constructor](#old-constructor)
+    * [Constructor](#constructor)
     * [(setStorage) How to change default storage](#setstorage)
     * [(getVersion)](#getversion)
     * [(getApp)](#getapp)
@@ -56,13 +54,15 @@ logger.
 
 ## <a name="api"></a>API
 
-### <a name="constructor"></a>Constructors
+### <a name="constructor"></a>Constructor
 
-We have two constructor. The **first parameter** in each one, is the **app or logger name**. The rest parameters is different in each constructor.
+This is the constructor interface:
 
-* <a name="new-constructor"></a>**NEW Constructor** (recomended):
+```javascript
+constructor(app:string, options?:LoggerageOptions)
+```
 
-The new constructor accept only one second parameter optionally, a [`LoggerageOptions`](#loggerageoptions) object.
+The **first parameter** is the **app or logger name**. The second parameter is optional, and is a [`LoggerageOptions`](#loggerageoptions) object, which defines different options for logger (all properties of the options are optionals).
 
 ```javascript
 const { Loggerage, LoggerageLevel, LoggerageOptions } = require("loggerage");
@@ -84,18 +84,6 @@ const logger = new Loggerage("MY-APP", {
     storage: myStorage
 });
 ```
-
-* <a name="old-constructor"></a>**OLD Constructor**:
-
-**The old constructor is deprecated**, but is supported at the moment. From version 2 this will not be supported.
-
-```javascript
-const { Loggerage, LoggerageLevel } = require("loggerage");
-
-const logger = new Loggerage("MY-APP", LoggerageLevel.INFO, 2);
-```
-* The second parameter is the default log level if we call to `.log()` method directly. `LoggerageLevel.DEBUG` by default.
-* The third parameter is the version. Accept number or string. It can be retrieved with the [`getVersion`](#getversion) method.
 
 ### <a name="setstorage"></a>.setStorage( *otherStorage* ) : *Loggerage*
 
