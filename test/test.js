@@ -5,6 +5,7 @@ global.localStorage = localStorage;
 const Loggerage = require("../build/loggerage").Loggerage;
 const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 const LoggerageOptions = require("../build/loggerage").LoggerageOptions;
+const WrapLocalStorage = require("../build/utils/wrap-localstorage").WrapLocalStorage;
 const AsyncStorage = require('./async-storage');
 const asyncStorage = new AsyncStorage();
 
@@ -135,24 +136,15 @@ describe("Loggerage", function() {
       }).to.throwException('localStorage not found. Set your Storage by \'.setStorage() method\'');
     });
 
-    it("if storage not implement correct interface, throw error when construction", function() {
-      const options = new LoggerageOptions();
-      options.storage = {};
-      i += 1;
-      expect(function() {
-        logger = new Loggerage(Date.now() + i, options);
-      }).to.throwException('[storage] param not implement \'getItem\' or \'setItem\' method');
-    });
-
     it("with own storage in constructor, has 1 log", function() {
       const options = new LoggerageOptions();
       options.storage = {
-        data: {},
+        data: [],
         getItem: function(key) {
-          return this.data[key];
+          return this.data;
         },
         setItem: function(key, value) {
-          this.data[key] = value;
+          this.data.push(value);
         }
       };
       logger = new Loggerage(Date.now() + i, options);
@@ -167,6 +159,9 @@ describe("Loggerage", function() {
     it("empty log in init (log == [])", function() {
       const log = logger.getLog();
       expect(log).to.be.empty();
+    });
+
+    it("(Async) empty log in init (log == [])", function() {
       asyncLogger.getLogAsync().then(function(data){
         expect(data).to.be.empty();
       }).catch(console.error);
@@ -176,10 +171,13 @@ describe("Loggerage", function() {
       logger.info("One log");
       const log = logger.getLog();
       expect(log).to.have.length(1);
+    });
+
+    it("(Async) has 1 log", function() {
       asyncLogger.infoAsync("One log").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data).to.have.length(1);
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(1);
       }).catch(console.error);
     });
 
@@ -189,17 +187,16 @@ describe("Loggerage", function() {
       });
       const log = logger.getLog();
       expect(log).to.have.length(3);
+    });
+
+    it("(Async) has 3 logs", function() {
       var arrPromise = Array.apply(null, Array(3)).map(function() {
         return asyncLogger.infoAsync("Log");
       });
-      asyncLogger.infoAsync("Log").then(function(){
-        asyncLogger.infoAsync("Log").then(function(){
-          asyncLogger.infoAsync("Log").then(function(){
-            asyncLogger.getLogAsync().then(function(data){
-              expect(data).to.have.length(3);
-            }).catch(console.error);
-          }).catch(console.error);
-        }).catch(console.error);
+      Promise.all(arrPromise).then(function(){
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(3);
       }).catch(console.error);
     });
 
@@ -211,18 +208,32 @@ describe("Loggerage", function() {
       expect(log).to.have.length(100);
     });
 
+    it("(Async) has 100 logs", function() {
+      var arrPromise = Array.apply(null, Array(100)).map(function() {
+        return asyncLogger.infoAsync("Log");
+      });
+      Promise.all(arrPromise).then(function(){
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(100);
+      }).catch(console.error);
+    });
+
     it("has 1 log with message 'One log' and level INFO", function() {
       logger.info("One log");
       const log = logger.getLog();
       expect(log).to.have.length(1);
       expect(log[0].level).to.equal("INFO");
       expect(log[0].message).to.equal("One log");
+    });
+
+    it("(Async) has 1 log with message 'One log' and level INFO", function() {
       asyncLogger.infoAsync("One log").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data).to.have.length(1);
-          expect(data[0].level).to.equal("INFO");
-          expect(data[0].message).to.equal("One log");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(1);
+        expect(data[0].level).to.equal("INFO");
+        expect(data[0].message).to.equal("One log");
       }).catch(console.error);
     });
 
@@ -235,16 +246,18 @@ describe("Loggerage", function() {
       logger.clearLog();
       log = logger.getLog();
       expect(log).to.have.length(0);
+    });
 
+    it("(Async) Before clear, has empty log (log == [])", function() {
       asyncLogger.infoAsync("Log").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data).to.have.length(1);
-          asyncLogger.clearLogAsync().then(function(){
-            asyncLogger.getLogAsync().then(function(data){
-              expect(data).to.have.length(0);
-            });
-          }).catch(console.error);
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(1);
+        return asyncLogger.clearLogAsync();
+      }).then(function(){
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data).to.have.length(0);
       }).catch(console.error);
     });
 
@@ -252,82 +265,116 @@ describe("Loggerage", function() {
       logger.debug("One log DEBUG");
       const log = logger.getLog();
       expect(log[0].level).to.equal("DEBUG");
+    });
+
+    it("(Async) has 1 log with level DEBUG", function() {
       asyncLogger.debugAsync("One log DEBUG").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("DEBUG");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("DEBUG");
       }).catch(console.error);
     });
+
     it("has 1 log with level TRACE", function() {
       logger.trace("One log TRACE");
       const log = logger.getLog();
       expect(log[0].level).to.equal("TRACE");
+    });
+
+    it("(Async) has 1 log with level TRACE", function() {
       asyncLogger.traceAsync("One log TRACE").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("TRACE");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("TRACE");
       }).catch(console.error);
     });
+
     it("has 1 log with level SUCCESS", function() {
       logger.success("One log SUCCESS");
       const log = logger.getLog();
       expect(log[0].level).to.equal("SUCCESS");
+    });
+
+    it("(Async) has 1 log with level SUCCESS", function() {
       asyncLogger.successAsync("One log SUCCESS").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("SUCCESS");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync()
+      }).then(function(data){
+        expect(data[0].level).to.equal("SUCCESS");
       }).catch(console.error);
     });
+
     it("has 1 log with level INFO", function() {
       logger.info("One log INFO");
       const log = logger.getLog();
       expect(log[0].level).to.equal("INFO");
+    });
+
+    it("(Async) has 1 log with level INFO", function() {
+      logger.info("One log INFO");
+      const log = logger.getLog();
+      expect(log[0].level).to.equal("INFO");
       asyncLogger.infoAsync("One log INFO").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("INFO");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("INFO");
       }).catch(console.error);
     });
+
     it("has 1 log with level WARN", function() {
       logger.warn("One log WARN");
       const log = logger.getLog();
       expect(log[0].level).to.equal("WARN");
+    });
+
+    it("(Async) has 1 log with level WARN", function() {
       asyncLogger.warnAsync("One log WARN").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("WARN");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("WARN");
       }).catch(console.error);
     });
+
     it("has 1 log with level ERROR", function() {
       logger.error("One log ERROR");
       const log = logger.getLog();
       expect(log[0].level).to.equal("ERROR");
+    });
+
+    it("(Async) has 1 log with level ERROR", function() {
       asyncLogger.errorAsync("One log ERROR").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("ERROR");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("ERROR");
       }).catch(console.error);
     });
+
     it("has 1 log with level FAILURE", function() {
       logger.failure("One log FAILURE");
       const log = logger.getLog();
       expect(log[0].level).to.equal("FAILURE");
+    });
+
+    it("(Async) has 1 log with level FAILURE", function() {
       asyncLogger.failureAsync("One log FAILURE").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].level).to.equal("FAILURE");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].level).to.equal("FAILURE");
       }).catch(console.error);
     });
+
     it("has 1 log with level ERROR, message 'Error' and stacktrace '[Stack Trace: Error StackTrace]'", function() {
       logger.error("Error", "Error StackTrace");
       const log = logger.getLog();
       expect(log[0].message.split("\n")[0]).to.equal("Error");
       expect(log[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
+    });
+
+    it("(Async) has 1 log with level ERROR, message 'Error' and stacktrace '[Stack Trace: Error StackTrace]'", function() {
       asyncLogger.errorAsync("Error", "Error StackTrace").then(function(){
-        asyncLogger.getLogAsync().then(function(data){
-          expect(data[0].message.split("\n")[0]).to.equal("Error");
-          expect(data[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
-        }).catch(console.error);
+        return asyncLogger.getLogAsync();
+      }).then(function(data){
+        expect(data[0].message.split("\n")[0]).to.equal("Error");
+        expect(data[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
       }).catch(console.error);
     });
   });
@@ -349,25 +396,17 @@ describe("Loggerage", function() {
       }).to.throwException('localStorage not found. Set your Storage by \'.setStorage() method\'');
     });
 
-    it("Fire exception if storage not implement Storage interface", function() {
-      global.localStorage = null;
-      const _logger = new Loggerage("STORAGE_NOT_CORRECT");
-      expect(function() {
-        _logger.setStorage({});
-      }).to.throwException('[storage] param not implement \'getItem\' or \'setItem\' method');
-    });
-
     it("Fire exception if not exist default localStorage and set before", function() {
       global.localStorage = null;
       const _logger = new Loggerage("WITHOUT_LOCALSTORAGE");
       expect(function() {
         _logger.info("One log");
       }).to.throwException('localStorage not found. Set your Storage by \'.setStorage() method\'');
-
-      _logger.setStorage(localStorage);
+      _logger.setStorage(new WrapLocalStorage(localStorage));
       _logger.info("One log");
       const log = _logger.getLog();
-      expect(log.length).to.equal(1);
+      global.localStorage = localStorage;
+      expect(log).to.have.length(1);
       expect(log[0].message).to.equal("One log");
     });
   });
