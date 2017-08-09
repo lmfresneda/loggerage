@@ -399,7 +399,7 @@ describe("Loggerage", function() {
     });
     it('Destroy stored logger', function(){
       new Loggerage("LOGGER_1");
-      let logger = Loggerage.getLogger('LOGGER_1');
+      var logger = Loggerage.getLogger('LOGGER_1');
       expect(logger.getApp()).to.equal("LOGGER_1");
       Loggerage.destroy(logger.getApp());
       logger = Loggerage.getLogger('LOGGER_1');

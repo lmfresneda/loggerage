@@ -10,4 +10,4 @@ node_js:
 matrix:
 fast_finish: true
 before_script:
-  - npm i -g typescript
+  - npm i -g typescript rimraf
