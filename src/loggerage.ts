@@ -24,7 +24,21 @@ declare var global: any;
  * Loggerage class
  */
 class Loggerage {
-  private _options:LoggerageOptions;
+  /**
+   * Return a stored logger
+   * @param  {string}    app App or logger name
+   * @return {Loggerage}
+   */
+  public static getLogger(app:string): Loggerage {
+    return Loggerage._loggers[app] as Loggerage;
+  }
+  /**
+   * Destroy a stored logger
+   * @param {string} app App or logger name
+   */
+  public static destroy(app:string): void {
+    delete Loggerage._loggers[app];
+  }
   /**
    * Constructor for Loggerage
    * @param app    App or Logger name
@@ -51,6 +65,7 @@ class Loggerage {
         colors.yellow('WARN: localStorage not found. Remember set your Storage by \'.setStorage() method\''));
     }
     this._app = app;
+    Loggerage._loggers[this._app] = this;
   }
 
   /**
@@ -395,6 +410,8 @@ class Loggerage {
    * Indicate if localStorage is ok (false by default)
    */
   private _isStorageOk:boolean = false;
+  private _options:LoggerageOptions;
+  private static _loggers:any = {};
 
   /**
    * Make an object for log

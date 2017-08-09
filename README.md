@@ -5,6 +5,9 @@
 loggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want. It also is able to create a .csv or .txt file with the log content.
 
 * [How to use](#how-to-use)
+* [Stored loggers](#stored-loggers)
+    * [Get Logger](#getlogger)
+    * [Destroy Logger](#destroylogger)
 * [API](#api)
     * [Constructor](#constructor)
     * [(setStorage) How to change default storage](#setstorage)
@@ -50,6 +53,44 @@ logger.
     debug("Hello world!").
     info("Info message").
     debug("End");
+```
+
+## <a name="stored-loggers"></a>Stored loggers
+
+### <a name="getlogger"></a>.getLogger( *app* ) : Loggerage
+
+When we build a logger, it's saved in Loggerage cache and can be retrieved by `getLogger` static method:
+
+```javascript
+const { Loggerage, LoggerageLevel } = require("loggerage");
+
+const logger = new Loggerage("MY-APP");
+logger.debug("Hello world!");
+
+// and after
+
+const logger = Loggerage.getLogger("MY-APP");
+logger.debug("Hello again world!");
+```
+
+Every time we build a logger with the same name, the previous one is overwritten.
+
+### <a name="destroylogger"></a>.destroy( *app* ) : void
+
+In addition, we can also destroy a stored logger by `destroy` static method:
+
+```javascript
+const { Loggerage, LoggerageLevel } = require("loggerage");
+
+const logger = new Loggerage("MY-APP");
+logger.debug("Hello world!");
+
+Loggerage.destroy("MY-APP"); // <-- destroy logger
+
+// and after
+
+const logger = Loggerage.getLogger("MY-APP");
+// logger is null!
 ```
 
 ## <a name="api"></a>API

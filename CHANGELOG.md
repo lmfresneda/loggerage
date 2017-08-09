@@ -1,4 +1,8 @@
-## [v2.0.0](https://github.com/lmfresneda/loggerage/releases/tag/1.4.0)
+## [v2.1.0](https://github.com/lmfresneda/loggerage/releases/tag/2.1.0)
+
+* Cache loggers ([issue #1](https://github.com/lmfresneda/loggerage/issues/1))
+
+## v2.0.0
 
 * Old constructor is removed, only accept `constructor(app, options)`
 * Separate classes in files

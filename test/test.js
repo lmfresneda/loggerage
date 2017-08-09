@@ -384,6 +384,28 @@ describe("Loggerage", function() {
       expect(log[0].message).to.equal("One log");
     });
   });
+
+  describe('Stored loggers', function(){
+    it('loggers are stored', function(){
+      new Loggerage("LOGGER_1");
+      new Loggerage("LOGGER_2");
+      new Loggerage("LOGGER_3");
+      const logger1 = Loggerage.getLogger('LOGGER_1');
+      const logger2 = Loggerage.getLogger('LOGGER_2');
+      const logger3 = Loggerage.getLogger('LOGGER_3');
+      expect(logger1.getApp()).to.equal("LOGGER_1");
+      expect(logger2.getApp()).to.equal("LOGGER_2");
+      expect(logger3.getApp()).to.equal("LOGGER_3");
+    });
+    it('Destroy stored logger', function(){
+      new Loggerage("LOGGER_1");
+      let logger = Loggerage.getLogger('LOGGER_1');
+      expect(logger.getApp()).to.equal("LOGGER_1");
+      Loggerage.destroy(logger.getApp());
+      logger = Loggerage.getLogger('LOGGER_1');
+      expect(logger).not.to.be.ok();
+    });
+  });
 });
 
 

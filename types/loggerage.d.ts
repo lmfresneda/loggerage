@@ -6,7 +6,17 @@ import { Storage } from './storage-interface';
  * Loggerage class
  */
 declare class Loggerage {
-    private _options;
+    /**
+     * Return a stored logger
+     * @param  {string}    app App or logger name
+     * @return {Loggerage}
+     */
+    static getLogger(app: string): Loggerage;
+    /**
+     * Destroy a stored logger
+     * @param {string} app App or logger name
+     */
+    static destroy(app: string): void;
     /**
      * Constructor for Loggerage
      * @param app    App or Logger name
@@ -211,6 +221,8 @@ declare class Loggerage {
      * Indicate if localStorage is ok (false by default)
      */
     private _isStorageOk;
+    private _options;
+    private static _loggers;
     /**
      * Make an object for log
      * @param logLevel
