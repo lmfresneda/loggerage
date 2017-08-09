@@ -1,3 +1,11 @@
+## [v1.4.0](https://github.com/lmfresneda/loggerage/releases/tag/1.4.0)
+
+* Separate classes in files
+* Separate types in files and other folder
+* Improvement storage interface
+* Improvement control types
+* Wrapped with 'Promise.resolve' calls in async methods
+
 ## [v1.3.0](https://github.com/lmfresneda/loggerage/releases/tag/1.3.0)
 
 * Insert app name and version properties in each log
