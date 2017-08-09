@@ -1,10 +1,12 @@
-## [v1.4.0](https://github.com/lmfresneda/loggerage/releases/tag/1.4.0)
+## [v2.0.0](https://github.com/lmfresneda/loggerage/releases/tag/1.4.0)
 
+* Old constructor is removed, only accept `constructor(app, options)`
 * Separate classes in files
 * Separate types in files and other folder
 * Improvement storage interface
 * Improvement control types
 * Wrapped with 'Promise.resolve' calls in async methods
+* **Not compatible with previous versions**
 
 ## [v1.3.0](https://github.com/lmfresneda/loggerage/releases/tag/1.3.0)
 
