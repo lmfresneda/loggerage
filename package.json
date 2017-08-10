@@ -14,7 +14,7 @@
   ],
   "scripts": {
     "test": "npm run build && mocha test/test.js",
-    "coverage": "./node_modules/istanbul/lib/cli cover _mocha test/test.js",
+    "coverage": "istanbul cover _mocha test/test.js",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "rimraf build && tsc"
   },
