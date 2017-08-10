@@ -13,7 +13,7 @@
     "javascript"
   ],
   "scripts": {
-    "test": "npm run build && mocha test/test.js --reporter progress",
+    "test": "npm run build && mocha test/test.js",
     "build": "rimraf build && tsc"
   },
   "repository": {
