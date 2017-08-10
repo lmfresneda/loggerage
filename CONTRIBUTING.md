@@ -8,3 +8,4 @@ If you want to contribute, check this:
 - [ ] Implement method or property that promisify all async methods automatically
 - [ ] Develop storages for different scenarios (like mysql, files log, etc)
 - [ ] Allow multiple storage (appendStorage method, for example)
+- [ ] Test, more test
