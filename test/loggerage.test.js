@@ -7,8 +7,8 @@ const Loggerage = require("../build/loggerage").Loggerage;
 const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
 const LoggerageOptions = require("../build/loggerage").LoggerageOptions;
 const WrapLocalStorage = require("../build/utils/wrap-localstorage").WrapLocalStorage;
-const AsyncStorage = require('./async-storage');
-const SyncStorage = require('./sync-storage');
+const AsyncStorage = require('./utils/async-storage');
+const SyncStorage = require('./utils/sync-storage');
 
 const consoleWarn = console.warn;
 console.warn = function(){};
@@ -40,6 +40,15 @@ describe("Loggerage", function() {
       logger = new Loggerage(Date.now() + i, options);
       i += 1;
       expect(logger.getDefaultLogLevel()).to.equal("INFO");
+    });
+
+    it("change default log level is equal to WARN", function() {
+      const options = new LoggerageOptions();
+      logger = new Loggerage(Date.now() + i, options);
+      i += 1;
+      expect(logger.getDefaultLogLevel()).to.equal("DEBUG");
+      logger.setDefaultLogLevel(LoggerageLevel.WARN);
+      expect(logger.getDefaultLogLevel()).to.equal("WARN");
     });
 
     it("log level is equal to INFO number", function() {
