@@ -24,7 +24,7 @@ export class Utils {
       if(ok && query.version) ok = log.version === query.version;
       if(ok && query.level && query.level instanceof Array) {
         ok = includes(query.level, log.level_number);
-      }else if(ok && query.level){
+      }else if(ok && query.level != undefined){
         ok = log.level_number === query.level;
       }
 

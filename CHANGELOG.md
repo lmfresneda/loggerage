@@ -1,3 +1,7 @@
+## v2.2.1
+
+* Bug fixed. Query with one DEBUG level not filtered. ([issue #9](https://github.com/lmfresneda/loggerage/issues/9))
+
 ## [v2.2.0](https://github.com/lmfresneda/loggerage/releases/tag/2.2.0)
 
 * Added get log by query system ([issue #2](https://github.com/lmfresneda/loggerage/issues/2))

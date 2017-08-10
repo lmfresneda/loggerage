@@ -1,6 +1,6 @@
 {
   "name": "loggerage",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage (or your own Storage)",
   "author": "lmfreneda <lmiguelfresneda@gmail.com>",
   "main": "./build/loggerage.js",
@@ -13,8 +13,8 @@
     "javascript"
   ],
   "scripts": {
-    "test": "npm run build && mocha test/test.js",
-    "coverage": "istanbul cover _mocha test/test.js",
+    "test": "npm run build && mocha test",
+    "coverage": "istanbul cover _mocha test",
     "report-coverage": "cat ./coverage/lcov.info | coveralls",
     "build": "rimraf build && tsc"
   },
