@@ -53,6 +53,21 @@ describe("Utils", function() {
     }, 2000);
   });
 
+  it("# getLogFiltered() with array null", function() {
+      var log = Utils.getLogFiltered(null);
+      expect(log).not.to.be.ok();
+  });
+
+  it("# getLogFiltered() with empty array", function() {
+      var log = Utils.getLogFiltered([]);
+      expect(log).to.have.length(0);
+  });
+
+  it("# getLogFiltered() with query null", function() {
+      var log = Utils.getLogFiltered([{}], null);
+      expect(log).to.have.length(1);
+  });
+
   it("# getUnixDate()", function() {
     const now = Date.now();
     expect(Utils.getUnixDate(now)).to.be.equal(now);
@@ -65,17 +80,15 @@ describe("Utils", function() {
   });
 
   it("# buildCsvContent()", function() {
+  });
 
-    const arr = [
-      { field1: 'value1', field2: 'value2' },
-      { field1: 'value11', field2: 'value22' }
-    ];
+  it("# buildCsvContent() with empty array", function() {
+
+    const arr = [];
 
     const csv = Utils.buildCsvContent(arr);
 
-    expect(csv).to.be.equal(
-      'field1;field2\nvalue1;value2\nvalue11;value22\n'
-    );
+    expect(csv).to.be.equal('');
   });
 
   it("# buildTxtContent()", function() {
@@ -90,5 +103,14 @@ describe("Utils", function() {
     expect(txt).to.be.equal(
       'field1\tfield2\nvalue1\tvalue2\nvalue11\tvalue22\n'
     );
+  });
+
+  it("# buildTxtContent() with empty array", function() {
+
+    const arr = [];
+
+    const txt = Utils.buildTxtContent(arr);
+
+    expect(txt).to.be.equal('');
   });
 });
