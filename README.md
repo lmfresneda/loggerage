@@ -1,6 +1,6 @@
 # loggerage
 
-[![npm](https://img.shields.io/npm/v/loggerage.svg?style=flat-square)](https://www.npmjs.com/package/loggerage) [![npm](https://img.shields.io/npm/dt/loggerage.svg?style=flat-square)](https://www.npmjs.com/package/loggerage) ![Love](https://img.shields.io/badge/love-max-brightgreen.svg?style=flat-square) [![Travis](https://img.shields.io/travis/lmfresneda/loggerage.svg?style=flat-square)](https://travis-ci.org/lmfresneda/loggerage) [![Coverage Status](https://coveralls.io/repos/github/lmfresneda/loggerage/badge.svg)](https://coveralls.io/github/lmfresneda/loggerage)
+[![npm](https://img.shields.io/npm/v/loggerage.svg?style=flat-square)](https://www.npmjs.com/package/loggerage) [![npm](https://img.shields.io/npm/dt/loggerage.svg?style=flat-square)](https://www.npmjs.com/package/loggerage) ![Love](https://img.shields.io/badge/love-max-brightgreen.svg?style=flat-square) [![Travis](https://img.shields.io/travis/lmfresneda/loggerage.svg?style=flat-square)](https://travis-ci.org/lmfresneda/loggerage) [![Coveralls](https://img.shields.io/coveralls/lmfresneda/loggerage.svg?style=flat-square)](https://coveralls.io/github/lmfresneda/loggerage)
 
 loggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want. It also is able to create a .csv or .txt file with the log content.
 
