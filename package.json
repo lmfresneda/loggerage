@@ -1,6 +1,6 @@
 {
   "name": "loggerage",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage (or your own Storage)",
   "author": "lmfreneda <lmiguelfresneda@gmail.com>",
   "main": "./build/loggerage.js",
@@ -13,7 +13,7 @@
     "javascript"
   ],
   "scripts": {
-    "test": "mocha test/test.js",
+    "test": "mocha test/test.js --reporter progress",
     "build": "rimraf build && tsc"
   },
   "repository": {
@@ -27,7 +27,9 @@
   "license": "MIT",
   "homepage": "https://github.com/lmfresneda/loggerage",
   "dependencies": {
+    "array-includes": "^3.0.3",
     "colors": "^1.1.2",
+    "moment": "^2.18.1",
     "object-assign": "^4.1.1"
   },
   "devDependencies": {
