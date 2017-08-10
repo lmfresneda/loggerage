@@ -1,6 +1,7 @@
 const expect = require('expect.js');
 const localStorage = require('localStorage');
 const promisify = require('promisify-node');
+const moment = require('moment');
 global.localStorage = localStorage;
 const Loggerage = require("../build/loggerage").Loggerage;
 const LoggerageLevel = require("../build/loggerage").LoggerageLevel;
@@ -126,10 +127,11 @@ describe("Loggerage", function() {
       expect(log).to.be.empty();
     });
 
-    it("(Async) empty log in init (log == [])", function() {
+    it("(Async) empty log in init (log == [])", function(done) {
       asyncLogger.getLogAsync().then(function(data){
         expect(data).to.be.empty();
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log", function() {
@@ -138,12 +140,13 @@ describe("Loggerage", function() {
       expect(log).to.have.length(1);
     });
 
-    it("(Async) has 1 log", function() {
+    it("(Async) has 1 log", function(done) {
       asyncLogger.infoAsync("One log").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(1);
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 3 logs", function() {
@@ -154,7 +157,7 @@ describe("Loggerage", function() {
       expect(log).to.have.length(3);
     });
 
-    it("(Async) has 3 logs", function() {
+    it("(Async) has 3 logs", function(done) {
       var arrPromise = Array.apply(null, Array(3)).map(function() {
         return asyncLogger.infoAsync("Log");
       });
@@ -162,7 +165,8 @@ describe("Loggerage", function() {
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(3);
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 100 logs", function() {
@@ -173,7 +177,7 @@ describe("Loggerage", function() {
       expect(log).to.have.length(100);
     });
 
-    it("(Async) has 100 logs", function() {
+    it("(Async) has 100 logs", function(done) {
       var arrPromise = Array.apply(null, Array(100)).map(function() {
         return asyncLogger.infoAsync("Log");
       });
@@ -181,7 +185,8 @@ describe("Loggerage", function() {
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(100);
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with message 'One log' and level INFO", function() {
@@ -192,14 +197,15 @@ describe("Loggerage", function() {
       expect(log[0].message).to.equal("One log");
     });
 
-    it("(Async) has 1 log with message 'One log' and level INFO", function() {
+    it("(Async) has 1 log with message 'One log' and level INFO", function(done) {
       asyncLogger.infoAsync("One log").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(1);
         expect(data[0].level).to.equal("INFO");
         expect(data[0].message).to.equal("One log");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("Before clear, has empty log (log == [])", function() {
@@ -213,7 +219,7 @@ describe("Loggerage", function() {
       expect(log).to.have.length(0);
     });
 
-    it("(Async) Before clear, has empty log (log == [])", function() {
+    it("(Async) Before clear, has empty log (log == [])", function(done) {
       asyncLogger.infoAsync("Log").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
@@ -223,7 +229,8 @@ describe("Loggerage", function() {
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(0);
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level DEBUG", function() {
@@ -232,12 +239,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("DEBUG");
     });
 
-    it("(Async) has 1 log with level DEBUG", function() {
+    it("(Async) has 1 log with level DEBUG", function(done) {
       asyncLogger.debugAsync("One log DEBUG").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].level).to.equal("DEBUG");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level TRACE", function() {
@@ -246,12 +254,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("TRACE");
     });
 
-    it("(Async) has 1 log with level TRACE", function() {
+    it("(Async) has 1 log with level TRACE", function(done) {
       asyncLogger.traceAsync("One log TRACE").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].level).to.equal("TRACE");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level SUCCESS", function() {
@@ -260,12 +269,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("SUCCESS");
     });
 
-    it("(Async) has 1 log with level SUCCESS", function() {
+    it("(Async) has 1 log with level SUCCESS", function(done) {
       asyncLogger.successAsync("One log SUCCESS").then(function(){
         return asyncLogger.getLogAsync()
       }).then(function(data){
         expect(data[0].level).to.equal("SUCCESS");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level INFO", function() {
@@ -274,7 +284,7 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("INFO");
     });
 
-    it("(Async) has 1 log with level INFO", function() {
+    it("(Async) has 1 log with level INFO", function(done) {
       logger.info("One log INFO");
       const log = logger.getLog();
       expect(log[0].level).to.equal("INFO");
@@ -282,7 +292,8 @@ describe("Loggerage", function() {
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].level).to.equal("INFO");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level WARN", function() {
@@ -291,12 +302,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("WARN");
     });
 
-    it("(Async) has 1 log with level WARN", function() {
+    it("(Async) has 1 log with level WARN", function(done) {
       asyncLogger.warnAsync("One log WARN").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].level).to.equal("WARN");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level ERROR", function() {
@@ -305,12 +317,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("ERROR");
     });
 
-    it("(Async) has 1 log with level ERROR", function() {
-      asyncLogger.errorAsync("One log ERROR").then(function(){
-        return asyncLogger.getLogAsync();
+    it("(Async) has 1 log with level ERROR", function(done) {
+      asyncLogger.errorAsync("One log ERROR", "").then(function(){
+        return asyncLogger.getLogAsync()
       }).then(function(data){
         expect(data[0].level).to.equal("ERROR");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level FAILURE", function() {
@@ -319,12 +332,13 @@ describe("Loggerage", function() {
       expect(log[0].level).to.equal("FAILURE");
     });
 
-    it("(Async) has 1 log with level FAILURE", function() {
-      asyncLogger.failureAsync("One log FAILURE").then(function(){
+    it("(Async) has 1 log with level FAILURE", function(done) {
+      asyncLogger.failureAsync("One log FAILURE", '').then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].level).to.equal("FAILURE");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
     it("has 1 log with level ERROR, message 'Error' and stacktrace '[Stack Trace: Error StackTrace]'", function() {
@@ -334,22 +348,235 @@ describe("Loggerage", function() {
       expect(log[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
     });
 
-    it("(Async) has 1 log with level ERROR, message 'Error' and stacktrace '[Stack Trace: Error StackTrace]'", function() {
+    it("(Async) has 1 log with level ERROR, message 'Error' and stacktrace '[Stack Trace: Error StackTrace]'", function(done) {
       asyncLogger.errorAsync("Error", "Error StackTrace").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data[0].message.split("\n")[0]).to.equal("Error");
         expect(data[0].message.split("\n")[1]).to.equal("[Stack Trace: Error StackTrace]");
-      }).catch(console.error);
+        done();
+      }).catch(done);
     });
 
-    it("(Async) call async methods with sync storage", function() {
+    it("(Async) call async methods with sync storage", function(done) {
       asyncLogger.setStorage(new SyncStorage);
       asyncLogger.infoAsync("One async log").then(function(){
         return asyncLogger.getLogAsync();
       }).then(function(data){
         expect(data).to.have.length(1);
-      }).catch(console.error);
+        done();
+      }).catch(done);
+    });
+  });
+
+  describe("Test get log with query", function() {
+    it("From 3 seconds to 1 second", function(done){
+      this.timeout(2500);
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.info('Info log 3');
+      setTimeout(function(){
+        logger.info('Info log 4 after 2 seconds');
+        logger.info('Info log 5 after 2 seconds');
+        logger.info('Info log 6 after 2 seconds');
+        const logs = logger.from(moment().subtract(3, 'seconds'))
+                           .to(moment().subtract(1, 'second'))
+                           .getLog();
+
+        expect(logs).to.have.length(3);
+        expect(logs[0].message).to.equal('Info log 1');
+        expect(logs[1].message).to.equal('Info log 2');
+        expect(logs[2].message).to.equal('Info log 3');
+        done();
+      }, 2000);
+    });
+    it("(Async) From 3 seconds to 1 second", function(done){
+      this.timeout(2500);
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.info('Info log 3');
+      setTimeout(function(){
+        logger.info('Info log 4 after 2 seconds');
+        logger.info('Info log 5 after 2 seconds');
+        logger.info('Info log 6 after 2 seconds');
+        logger.from(moment().subtract(3, 'seconds'))
+              .to(moment().subtract(1, 'second'))
+              .getLogAsync(function(err, logs){
+          if(err) return done(err);
+          expect(logs).to.have.length(3);
+          expect(logs[0].message).to.equal('Info log 1');
+          expect(logs[1].message).to.equal('Info log 2');
+          expect(logs[2].message).to.equal('Info log 3');
+          done();
+        });
+      }, 2000);
+    });
+    it("From 3 seconds to 1 second but after filter is reset", function(done){
+      this.timeout(2500);
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.info('Info log 3');
+      setTimeout(function(){
+        logger.info('Info log 4 after 2 seconds');
+        logger.info('Info log 5 after 2 seconds');
+        logger.info('Info log 6 after 2 seconds');
+        const logs = logger.from(moment().subtract(3, 'seconds'))
+                           .to(moment().subtract(1, 'second'))
+                           .getLog();
+
+        expect(logs).to.have.length(3);
+        expect(logs[0].message).to.equal('Info log 1');
+        expect(logs[1].message).to.equal('Info log 2');
+        expect(logs[2].message).to.equal('Info log 3');
+
+        const logsAfter = logger.getLog();
+        expect(logsAfter).to.have.length(6);
+        expect(logsAfter[3].message).to.equal('Info log 4 after 2 seconds');
+        expect(logsAfter[4].message).to.equal('Info log 5 after 2 seconds');
+        expect(logsAfter[5].message).to.equal('Info log 6 after 2 seconds');
+        done();
+      }, 2000);
+    });
+    it("(Async) From 3 seconds to 1 second but after filter is reset", function(done){
+      this.timeout(2500);
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.info('Info log 3');
+      setTimeout(function(){
+        logger.info('Info log 4 after 2 seconds');
+        logger.info('Info log 5 after 2 seconds');
+        logger.info('Info log 6 after 2 seconds');
+        logger.from(moment().subtract(3, 'seconds'))
+              .to(moment().subtract(1, 'second'))
+              .getLogAsync(function(err, logs){
+          if(err) return done(err);
+          expect(logs).to.have.length(3);
+          expect(logs[0].message).to.equal('Info log 1');
+          expect(logs[1].message).to.equal('Info log 2');
+          expect(logs[2].message).to.equal('Info log 3');
+
+          logger.getLogAsync(function(err, logsAfter){
+            if(err) return done(err);
+            expect(logsAfter).to.have.length(6);
+            expect(logsAfter[3].message).to.equal('Info log 4 after 2 seconds');
+            expect(logsAfter[4].message).to.equal('Info log 5 after 2 seconds');
+            expect(logsAfter[5].message).to.equal('Info log 6 after 2 seconds');
+            done();
+          });
+        });
+      }, 2000);
+    });
+    it("Only with INFO level", function(){
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.debug('Debug log 1');
+      logger.debug('Debug log 2');
+      logger.error('Error log 1');
+      logger.error('Error log 2');
+      const logs = logger.level(LoggerageLevel.INFO).getLog();
+      expect(logs).to.have.length(2);
+      expect(logs[0].level_number).to.equal(LoggerageLevel.INFO);
+      expect(logs[1].level_number).to.equal(LoggerageLevel.INFO);
+      expect(logs[0].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+      expect(logs[1].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+    });
+    it("(Async) Only with INFO level", function(done){
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.debug('Debug log 1');
+      logger.debug('Debug log 2');
+      logger.error('Error log 1');
+      logger.error('Error log 2');
+      logger.level(LoggerageLevel.INFO).getLogAsync(function(err, logs){
+        if(err) return done(err);
+
+        expect(logs).to.have.length(2);
+        expect(logs[0].level_number).to.equal(LoggerageLevel.INFO);
+        expect(logs[1].level_number).to.equal(LoggerageLevel.INFO);
+        expect(logs[0].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+        expect(logs[1].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+        done();
+      });
+    });
+    it("Only with INFO and ERROR level", function(){
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.debug('Debug log 1');
+      logger.debug('Debug log 2');
+      logger.error('Error log 1');
+      logger.error('Error log 2');
+      const logs = logger.level([LoggerageLevel.INFO, LoggerageLevel.ERROR]).getLog();
+      expect(logs).to.have.length(4);
+      expect(logs[0].level_number).to.equal(LoggerageLevel.INFO);
+      expect(logs[1].level_number).to.equal(LoggerageLevel.INFO);
+      expect(logs[0].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+      expect(logs[1].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+      expect(logs[2].level_number).to.equal(LoggerageLevel.ERROR);
+      expect(logs[3].level_number).to.equal(LoggerageLevel.ERROR);
+      expect(logs[2].level).to.equal(LoggerageLevel[LoggerageLevel.ERROR]);
+      expect(logs[3].level).to.equal(LoggerageLevel[LoggerageLevel.ERROR]);
+    });
+    it("(Async) Only with INFO and ERROR level", function(done){
+      logger.info('Info log 1');
+      logger.info('Info log 2');
+      logger.debug('Debug log 1');
+      logger.debug('Debug log 2');
+      logger.error('Error log 1');
+      logger.error('Error log 2');
+      logger.level([LoggerageLevel.INFO, LoggerageLevel.ERROR]).getLogAsync(function(err, logs){
+        if(err) return done(err);
+
+        expect(logs).to.have.length(4);
+        expect(logs[0].level_number).to.equal(LoggerageLevel.INFO);
+        expect(logs[1].level_number).to.equal(LoggerageLevel.INFO);
+        expect(logs[0].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+        expect(logs[1].level).to.equal(LoggerageLevel[LoggerageLevel.INFO]);
+        expect(logs[2].level_number).to.equal(LoggerageLevel.ERROR);
+        expect(logs[3].level_number).to.equal(LoggerageLevel.ERROR);
+        expect(logs[2].level).to.equal(LoggerageLevel[LoggerageLevel.ERROR]);
+        expect(logs[3].level).to.equal(LoggerageLevel[LoggerageLevel.ERROR]);
+        done();
+      });
+    });
+    it("Only with version 1", function(){
+      const logger1 = new Loggerage('QUERY_LOGGER_VERSION', { version: 1 });
+      logger1.info('Info log 1 version 1');
+      logger1.info('Info log 2 version 1');
+      const logger2 = new Loggerage('QUERY_LOGGER_VERSION', { version: 2 });
+      logger2.info('Info log 1 version 2');
+      logger2.info('Info log 2 version 2');
+      const logs = logger2.getLog();
+      // No matter the version, must have 4 logs because the 2 use the same default localStorage
+      expect(logs).to.have.length(4);
+
+      const logsFiltered = logger2.version(2).getLog();
+
+      expect(logsFiltered).to.have.length(2);
+      expect(logsFiltered[0].version).to.equal(2);
+      expect(logsFiltered[1].version).to.equal(2);
+    });
+    it("(Async) Only with version 1", function(done){
+      const logger1 = new Loggerage('QUERY_LOGGER_VERSION', { version: 1 });
+      logger1.clearLog();
+      logger1.info('Info log 1 version 1');
+      logger1.info('Info log 2 version 1');
+      const logger2 = new Loggerage('QUERY_LOGGER_VERSION', { version: 2 });
+      logger2.info('Info log 1 version 2');
+      logger2.info('Info log 2 version 2');
+      logger2.getLogAsync(function(err, logs){
+        if(err) return done(err);
+        // No matter the version, must have 4 logs because the 2 use the same default localStorage
+        expect(logs).to.have.length(4);
+
+        logger2.version(2).getLogAsync(function(err, logsFiltered){
+          if(err) return done(err);
+
+          expect(logsFiltered).to.have.length(2);
+          expect(logsFiltered[0].version).to.equal(2);
+          expect(logsFiltered[1].version).to.equal(2);
+          done();
+        });
+      })
     });
   });
 

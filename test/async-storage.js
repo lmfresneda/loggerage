@@ -7,20 +7,32 @@ function AsyncStorage(){
 AsyncStorage.prototype.setItem = function(id, val) {
   this.data[id] = this.data[id] || [];
 	return new Promise((resolve, reject) => {
-		this.data[id].push(val);
-		resolve();
+    try{
+  		this.data[id].push(val);
+  		resolve();
+    }catch(err){
+      reject(err);
+    }
 	});
 }
 AsyncStorage.prototype.getItem = function(id) {
   this.data[id] = this.data[id] || [];
 	return new Promise((resolve, reject) => {
-		resolve(this.data[id]);
+    try{
+		  resolve(this.data[id]);
+    }catch(err){
+      reject(err);
+    }
 	});
 }
 AsyncStorage.prototype.clear = function() {
   return new Promise((resolve, reject) => {
-    this.data = {};
-    resolve();
+    try{
+      this.data = {};
+      resolve();
+    }catch(err){
+      reject(err);
+    }
   });
 }
 
