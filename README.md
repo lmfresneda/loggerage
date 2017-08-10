@@ -5,9 +5,6 @@
 loggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want. It also is able to create a .csv or .txt file with the log content.
 
 * [How to use](#how-to-use)
-* [Stored loggers](#stored-loggers)
-    * [Get Logger](#getlogger)
-    * [Destroy Logger](#destroylogger)
 * [API](#api)
     * [Constructor](#constructor)
     * [(setStorage) How to change default storage](#setstorage)
@@ -23,7 +20,11 @@ loggerage is a Javascript logger who saves the register directly on localStorage
     * [(clearLog) How to clear log stored](#clearlog)
     * [(clearLogAsync) How to clear log asynchronously](#clearlogasync)
     * [(downloadFileLog) How to download file with a log stored](#downloadfile)
+    * [Get Log filtered](#query-log)
     * [INSERT LOG METHODS](#info)
+* [Stored loggers](#stored-loggers)
+    * [Get Logger](#getlogger)
+    * [Destroy Logger](#destroylogger)
 * [LoggerageOptions](#loggerageoptions)
 * [(Async) Things about async methods](#async)
 * [Convert async methods to Promises](#async-to-promises)
@@ -134,12 +135,13 @@ We can indicate a different storage other than the default one. This new storage
 // file: 'src/storage-interface.ts'
 
 interface Storage {
-  getItem(key:string): Array<LoggerageObject> | Promise<Array<LoggerageObject>>
+  getItem(key:string, query?:Query): LoggerageObject[] | Promise<LoggerageObject[]>
   setItem(key:string, value:LoggerageObject): void | Promise<void>
   clear(): void | Promise<void>
 }
 
-// 'key' is the name of app or logger, indicated in constructor
+// 'key' is the name of app or logger, indicated in constructor.
+// 'query' is optional.
 ```
 
 It's similar to [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Storage), but not working with strings in the return of `getItem` and second parameter of `setItem`.
@@ -174,7 +176,7 @@ Set silence console logs.
 
 Get actual silence console logs.
 
-### <a name="getlog"></a>.getLog( ) : *Array\<LoggerageObject\>*
+### <a name="getlog"></a>.getLog( ) : *LoggerageObject[]*
 
 Returns the actual log saved at storage in an LoggerageObject Array, like this:
 
@@ -187,6 +189,7 @@ LoggerageObject = {
     timestamp: number,      // Created by Date.now()
     date : "string",        // Creation date in Date.toLocaleString() format
     level : "string",       // log level
+    level_number : number,  // log level number
     message : "string"      // logged message
 }
 ```
@@ -212,6 +215,82 @@ Name file format is:
 [ App name ]_[ Date.now() ]_log.[ type ]
 
 Example: `MY-APP_1462995577596_log.txt`
+
+### <a name="query-log"></a>Get Log filtered
+
+You can get the log by applying a filter. In the default localStorage, the log is return filtered by the query. In the custom storages, the query is passed in second parameter of `getItem` method, **only if a query is required**. Example of query:
+
+```javascript
+const { Loggerage, LoggerageLevel } = require("loggerage");
+
+const logger = new Loggerage("MY-APP");
+logger.info('Info log');
+logger.debug('Debug log');
+const log = logger.level(LoggerageLevel.INFO).getLog();
+
+// log = [{ level: 'INFO', level_number: 3, message: 'Info log' ... }];
+```
+
+These query system also apply for the `getLogAsync` method.
+
+**Query methods**:
+
+* `.from( from: Moment|Date|string|number, dateStringFormat?: string )`:
+* `.to( from: Moment|Date|string|number, dateStringFormat?: string )`:
+
+From and To methods, receives one of `Moment|Date|string|number` type, and if the date is passed in `string` type, we can provide a [*moment* format](https://momentjs.com/docs/#/parsing/string-format/). The format by default for string dates is `YYYY-MM-DD HH:mm:ss.SSS`. Number is a unix timestamp (in [milliseconds](https://momentjs.com/docs/#/parsing/unix-timestamp-milliseconds/))
+
+* `.version( version: number|string )`:
+
+Recieve the version of app or logger. Remember that diferents loggers can be with the same name, but different version.
+
+* `.level( level: LoggerageLevel|LoggerageLevel[] )`:
+
+Recieve one or some levels to filter.
+
+* `.app( app: string )`:
+
+Recieve the app or logger name. It's mainly made for custom storages, because with the default localStorage, the log is filtered by app name always.
+
+**Complete example**:
+
+```javascript
+const { Loggerage, LoggerageLevel, LoggerageOptions } = require("loggerage");
+
+const opt1 = new LoggerageOptions();
+opt1.version = '1.0';
+const opt2 = new LoggerageOptions();
+opt2.version = '2.0';
+
+const logger1 = new Loggerage("MY-APP", opt1);
+const logger2 = new Loggerage("MY-APP", opt2);
+
+logger1.info('Info log 1');   // LOGGER 1
+logger1.info('Info log 2');   // LOGGER 1
+logger1.debug('Debug log 1'); // LOGGER 1
+
+// after 5 seconds
+
+logger1.debug('Debug log 2'); // LOGGER 1
+logger2.info('Info log 2');   // LOGGER 2
+logger2.debug('Debug log 3'); // LOGGER 2
+
+const logs1 = logger1
+                .from(moment().subtract(6, 'seconds'))
+                .to(moment().subtract(4, 'seconds'))
+                .level(LoggerageLevel.INFO)
+                .version('1.0') // this is not necessary in this case, but don't care
+                .getLog();
+
+// [logs1] include only 'Info log 1' and 'Info log 2' logs
+
+logger2.from(moment().subtract(2, 'second')).getLogAsync(function(err, logs2) {
+  // It's asynchronous just to see that it works with this method too
+
+  // [logs2] include only 'Debug log 2', 'Info log 2' and 'Debug log 3' logs
+  // include one log of 'logger1' because the two use the same app name, use the default localStorage and no is filtered by version
+});
+```
 
 ### <a name="info"></a>.info( *message* ) : *Loggerage*
 
@@ -259,7 +338,7 @@ Logs a message with ERROR level. Concats `stacktrace` to message if stacktrace e
 
 ### <a name="errorasync"></a>.errorAsync( *message, stacktrace, callback* ) : *void*
 
-Logs a message with ERROR level asynchronously. Concats stacktrace to message if `stacktrace` exists, which can be null.
+Logs a message with ERROR level asynchronously. Concats stacktrace to message. `stacktrace` is required.
 
 ### <a name="failure"></a>.failure( *message[, stacktrace]* ) : *Loggerage*
 
@@ -267,7 +346,7 @@ Logs a message with FAILURE level. Concats stacktrace to message if `stacktrace`
 
 ### <a name="failureasync"></a>.failureAsync( *message, stacktrace, callback* ) : *void*
 
-Logs a message with FAILURE level asynchronously. Concats stacktrace to message if `stacktrace` exists, which can be null.
+Logs a message with ERROR level asynchronously. Concats stacktrace to message. `stacktrace` is required.
 
 ### <a name="log"></a>.log( *logLevel, message[, stacktrace]* ) : *Loggerage*
 
