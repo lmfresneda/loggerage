@@ -10,7 +10,7 @@ describe("Utils", function() {
 
   it("# getLogFiltered()", function(done) {
     this.timeout(2500);
-    let logs = [
+    var logs = [
       new LoggerageObject(LoggerageLevel[LoggerageLevel.INFO], '1 info log', 'MY-APP', 1),
       new LoggerageObject(LoggerageLevel[LoggerageLevel.INFO], '2 info log', 'MY-APP', 1),
       new LoggerageObject(LoggerageLevel[LoggerageLevel.DEBUG], '1 debug log', 'MY-APP', 1),
@@ -27,11 +27,11 @@ describe("Utils", function() {
         new LoggerageObject(LoggerageLevel[LoggerageLevel.ERROR], '3 error log', 'MY-APP', 2)
       ]);
 
-      let queriable = new Queriable();
+      var queriable = new Queriable();
 
       queriable.from(moment().subtract(3, 'seconds'))
                 .to(moment().subtract(1, 'second'));
-      let log = Utils.getLogFiltered(logs, queriable.getQueryRequest());
+      var log = Utils.getLogFiltered(logs, queriable.getQueryRequest());
       expect(log).to.have.length(6);
 
       queriable.version(1);
