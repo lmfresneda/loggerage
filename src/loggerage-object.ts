@@ -1,3 +1,5 @@
+import { LoggerageLevel } from './loggerage-level';
+
 /**
  * Each log
  */
@@ -23,10 +25,15 @@ export class LoggerageObject {
    */
   date:string;
   /**
-   * Level log
+   * String level log, like INFO, ERROR...
    * @type {string}
    */
   level:string;
+  /**
+   * Number level log, like 3, 4..
+   * @type {string}
+   */
+  level_number:number;
   /**
    * Message log
    * @type {string}
@@ -44,6 +51,7 @@ export class LoggerageObject {
     this.timestamp = ts;
     this.date = now.toLocaleString();
     this.level = _level;
+    this.level_number = LoggerageLevel[_level];
     this.message = _message;
     if(_app) this.app = _app;
     if(_version) this.version = _version;
