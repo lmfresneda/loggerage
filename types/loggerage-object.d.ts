@@ -23,10 +23,15 @@ export declare class LoggerageObject {
      */
     date: string;
     /**
-     * Level log
+     * String level log, like INFO, ERROR, etc...
      * @type {string}
      */
     level: string;
+    /**
+     * Number level log, like 3 for INFO, 4 for ERROR, etc..
+     * @type {string}
+     */
+    level_number: number;
     /**
      * Message log
      * @type {string}

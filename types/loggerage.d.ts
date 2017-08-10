@@ -1,3 +1,4 @@
+import { Queriable } from './utils/query';
 import { LoggerageOptions } from './loggerage-options';
 import { LoggerageObject } from './loggerage-object';
 import { LoggerageLevel } from './loggerage-level';
@@ -5,18 +6,7 @@ import { Storage } from './storage-interface';
 /**
  * Loggerage class
  */
-declare class Loggerage {
-    /**
-     * Return a stored logger
-     * @param  {string}    app App or logger name
-     * @return {Loggerage}
-     */
-    static getLogger(app: string): Loggerage;
-    /**
-     * Destroy a stored logger
-     * @param {string} app App or logger name
-     */
-    static destroy(app: string): void;
+declare class Loggerage extends Queriable {
     /**
      * Constructor for Loggerage
      * @param app    App or Logger name
@@ -29,6 +19,17 @@ declare class Loggerage {
      * @returns {Loggerage}
      */
     setStorage(storage: Storage): Loggerage;
+    /**
+     * Get the actual log
+     * @returns {LoggerageObject[]}
+     */
+    getLog(): LoggerageObject[];
+    /**
+     * Get the actual log asynchronously
+     * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
+     * @returns {void}
+     */
+    getLogAsync(callback: (error: Error, data?: LoggerageObject[]) => void): void;
     /**
      * Return the app version
      * @returns {number}
@@ -66,17 +67,6 @@ declare class Loggerage {
      * @returns {boolean}
      */
     getSilence(): boolean;
-    /**
-     * Get the actual log
-     * @returns {LoggerageObject[]}
-     */
-    getLog(): LoggerageObject[];
-    /**
-     * Get the actual log asynchronously
-     * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
-     * @returns {void}
-     */
-    getLogAsync(callback: (error: Error, data?: LoggerageObject[]) => void): void;
     /**
      * Clear all the log
      * @returns {Loggerage}
@@ -214,6 +204,17 @@ declare class Loggerage {
      */
     failureAsync(message: string, stacktrace: string, callback: (error: Error | void) => void): void;
     /**
+     * Return a stored logger
+     * @param  {string}    app App or logger name
+     * @return {Loggerage}
+     */
+    static getLogger(app: string): Loggerage;
+    /**
+     * Destroy a stored logger
+     * @param {string} app App or logger name
+     */
+    static destroy(app: string): void;
+    /**
      * App name for localStorage
      */
     private _app;
@@ -221,7 +222,13 @@ declare class Loggerage {
      * Indicate if localStorage is ok (false by default)
      */
     private _isStorageOk;
+    /**
+     * Options for logger
+     */
     private _options;
+    /**
+     * Store of loggers
+     */
     private static _loggers;
     /**
      * Make an object for log

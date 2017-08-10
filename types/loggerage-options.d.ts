@@ -31,7 +31,7 @@ export declare class LoggerageOptions {
     /**
      * Storage to use. Should implement 'getItem' and 'setItem' of Storage interface
      * @see https://developer.mozilla.org/en-US/docs/Web/API/Storage
-     * @type {any}
+     * @type {Storage}
      */
     storage: Storage;
 }

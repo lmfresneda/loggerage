@@ -1,6 +1,8 @@
-
+import * as moment from 'moment';
 import { LoggerageObject } from '../loggerage-object';
 import { Storage } from '../storage-interface';
+import { Utils } from './utils';
+import { Query } from './query';
 
 export class WrapLocalStorage implements Storage {
 
@@ -10,8 +12,11 @@ export class WrapLocalStorage implements Storage {
     this._storage = localStorage;
   }
 
-  getItem(app:string): Array<LoggerageObject>{
-    let logs:Array<LoggerageObject> = JSON.parse(this._storage.getItem(app) || "[]");
+  getItem(app:string, query?:Query): LoggerageObject[]{
+    let logs:LoggerageObject[] = JSON.parse(this._storage.getItem(app) || "[]");
+
+    if(query) logs = Utils.getLogFiltered(logs, query);
+
     return logs;
   }
 

@@ -6,8 +6,10 @@
  */
 import * as colors from 'colors';
 import * as assign from 'object-assign';
+import * as moment from 'moment';
 import { Utils } from './utils/utils';
 import { WrapLocalStorage } from './utils/wrap-localstorage';
+import { Queriable } from './utils/query';
 import { LoggerageOptions } from './loggerage-options';
 import { LoggerageObject } from './loggerage-object';
 import { LoggerageLevel } from './loggerage-level';
@@ -19,32 +21,22 @@ import { Storage } from './storage-interface';
 declare var global: any;
 
 
-
 /**
  * Loggerage class
  */
-class Loggerage {
-  /**
-   * Return a stored logger
-   * @param  {string}    app App or logger name
-   * @return {Loggerage}
-   */
-  public static getLogger(app:string): Loggerage {
-    return Loggerage._loggers[app] as Loggerage;
-  }
-  /**
-   * Destroy a stored logger
-   * @param {string} app App or logger name
-   */
-  public static destroy(app:string): void {
-    delete Loggerage._loggers[app];
-  }
+class Loggerage extends Queriable {
+
+  //========================//
+  //      CONSTRUCTOR       //
+  //========================//
+
   /**
    * Constructor for Loggerage
    * @param app    App or Logger name
    * @param rest   Optional parameters
    */
   constructor(app:string, options?:LoggerageOptions){
+    super();
     this._options = new LoggerageOptions();
 
     if(options) this._options = assign(this._options, options);
@@ -66,7 +58,12 @@ class Loggerage {
     }
     this._app = app;
     Loggerage._loggers[this._app] = this;
+    this.resetQuery();
   }
+
+  //====================//
+  //      STORAGE       //
+  //====================//
 
   /**
    * Set your own Storage
@@ -76,20 +73,64 @@ class Loggerage {
   setStorage(storage:Storage):Loggerage {
     this._options.storage = storage;
     this._isStorageOk = true;
+    this.resetQuery();
     return this;
   }
+
+  //====================//
+  //      GET LOG       //
+  //====================//
+
+  /**
+   * Get the actual log
+   * @returns {LoggerageObject[]}
+   */
+  getLog():LoggerageObject[]{
+    const logs = (
+      this._options.storage.getItem(this._app, this.isQueryRequested ? this.getQueryRequest() : null)
+    ) as LoggerageObject[];
+    this.resetQuery();
+    return logs;
+  }
+
+  /**
+   * Get the actual log asynchronously
+   * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
+   * @returns {void}
+   */
+  getLogAsync(callback:(error:Error, data?:LoggerageObject[]) => void):void{
+    Promise.resolve(
+        this._options.storage.getItem(this._app, this.isQueryRequested ? this.getQueryRequest() : null)
+    ).then((data) => {
+      this.resetQuery();
+      callback(null, data);
+    }).catch((err) => {
+      this.resetQuery();
+      callback(err);
+    });
+  }
+
+  //================================//
+  //      GET/SET INFO LOGGER       //
+  //================================//
 
   /**
    * Return the app version
    * @returns {number}
    */
-  getVersion():number|string { return this._options.version; }
+  getVersion():number|string {
+    this.resetQuery();
+    return this._options.version;
+  }
 
   /**
    * Return the app name for localStorage
    * @returns {string}
    */
-  getApp():string { return this._app; }
+  getApp():string {
+    this.resetQuery();
+    return this._app;
+  }
 
   /**
    * Set the default log level
@@ -98,6 +139,7 @@ class Loggerage {
    */
   setDefaultLogLevel(defaultLogLevel:LoggerageLevel):Loggerage {
     this._options.defaultLogLevel = defaultLogLevel;
+    this.resetQuery();
     return this;
   }
 
@@ -106,6 +148,7 @@ class Loggerage {
    * @returns {string}
    */
   getDefaultLogLevel():string {
+    this.resetQuery();
     return LoggerageLevel[this._options.defaultLogLevel];
   }
 
@@ -114,6 +157,7 @@ class Loggerage {
    * @returns {number}
    */
   getDefaultLogLevelNumber():number {
+    this.resetQuery();
     return this._options.defaultLogLevel;
   }
 
@@ -124,6 +168,7 @@ class Loggerage {
    */
   setSilence(silence:boolean):Loggerage {
     this._options.silence = silence;
+    this.resetQuery();
     return this;
   }
 
@@ -132,31 +177,13 @@ class Loggerage {
    * @returns {boolean}
    */
   getSilence():boolean {
+    this.resetQuery();
     return this._options.silence;
   }
 
-  /**
-   * Get the actual log
-   * @returns {LoggerageObject[]}
-   */
-  getLog():LoggerageObject[]{
-    const logs = this._options.storage.getItem(this._app) as LoggerageObject[];
-    return logs;
-  }
-
-  /**
-   * Get the actual log asynchronously
-   * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is log.
-   * @returns {void}
-   */
-  getLogAsync(callback:(error:Error, data?:LoggerageObject[]) => void):void{
-    Promise.resolve(this._options.storage.getItem(this._app)).then((data) => {
-      const logs:LoggerageObject[] = data;
-      callback(null, data);
-    }).catch((err) => {
-      callback(err);
-    });
-  }
+  //======================//
+  //      CLEAR LOG       //
+  //======================//
 
   /**
    * Clear all the log
@@ -164,6 +191,7 @@ class Loggerage {
    */
   clearLog():Loggerage {
     this._options.storage.clear();
+    this.resetQuery();
     return this;
   }
 
@@ -173,7 +201,13 @@ class Loggerage {
    * @returns {void}
    */
   clearLogAsync(callback:(error:Error|void) => void):void {
-    Promise.resolve(this._options.storage.clear()).then(callback).catch(callback);
+    Promise.resolve(this._options.storage.clear()).then(() => {
+      this.resetQuery();
+      callback(null);
+    }).catch((err) => {
+      this.resetQuery();
+      callback(err);
+    });
   }
 
   /**
@@ -199,6 +233,7 @@ class Loggerage {
     }else {
       throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
     }
+    this.resetQuery();
     return this;
   }
 
@@ -226,12 +261,18 @@ class Loggerage {
         let blob = Utils.getBlob(contenido, type);
         let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
         Utils.downloadBlob(blob, nameFile);
+        this.resetQuery();
         callback(null, blob);
       })
     }else {
+      this.resetQuery();
       callback(new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser."));
     }
   }
+
+  //========================//
+  //      LOG METHODS       //
+  //========================//
 
   /**
    * Log a message of all levels
@@ -250,6 +291,7 @@ class Loggerage {
     }
     const logObj:LoggerageObject = this._makeLoggerageObject(logLevel, message);
     this._options.storage.setItem(this._app, logObj);
+    this.resetQuery();
     return this;
   }
 
@@ -270,9 +312,18 @@ class Loggerage {
       message += `\n[Stack Trace: ${stacktrace}]`;
     }
     const logObj:LoggerageObject = this._makeLoggerageObject(logLevel, message);
-
-    Promise.resolve(this._options.storage.setItem(this._app, logObj)).then(callback).catch(callback);
+    Promise.resolve(this._options.storage.setItem(this._app, logObj)).then(() => {
+      this.resetQuery();
+      callback(null);
+    }).catch((err) => {
+      this.resetQuery();
+      callback(err);
+    });
   }
+
+  //=============================//
+  //      EASY LOG METHODS       //
+  //=============================//
 
   /**
    * Log a debug message
@@ -398,9 +449,29 @@ class Loggerage {
     this.logAsync(LoggerageLevel.FAILURE, message, stacktrace, callback);
   }
 
-  //                   //
+  //===========================//
+  //      STATIC METHODS       //
+  //===========================//
+
+  /**
+   * Return a stored logger
+   * @param  {string}    app App or logger name
+   * @return {Loggerage}
+   */
+  static getLogger(app:string): Loggerage {
+    return Loggerage._loggers[app] as Loggerage;
+  }
+  /**
+   * Destroy a stored logger
+   * @param {string} app App or logger name
+   */
+  static destroy(app:string): void {
+    delete Loggerage._loggers[app];
+  }
+
+  //===================//
   //      PRIVATE      //
-  //                   //
+  //===================//
 
   /**
    * App name for localStorage
@@ -410,9 +481,14 @@ class Loggerage {
    * Indicate if localStorage is ok (false by default)
    */
   private _isStorageOk:boolean = false;
+  /**
+   * Options for logger
+   */
   private _options:LoggerageOptions;
+  /**
+   * Store of loggers
+   */
   private static _loggers:any = {};
-
   /**
    * Make an object for log
    * @param logLevel
@@ -420,7 +496,7 @@ class Loggerage {
    * @private
    * @returns {LoggerageObject}
    */
-  private _makeLoggerageObject(logLevel:LoggerageLevel = this._options.defaultLogLevel, message:string):LoggerageObject {
+  private _makeLoggerageObject(logLevel:LoggerageLevel, message:string):LoggerageObject {
     let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this._app, this._options.version);
     return logObj;
   }

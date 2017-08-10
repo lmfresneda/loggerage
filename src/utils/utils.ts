@@ -1,13 +1,65 @@
+import * as moment from 'moment';
+import * as includes from 'array-includes';
+import { LoggerageObject } from '../loggerage-object';
+import { LoggerageLevel } from '../loggerage-level';
+import { Query } from './query';
+
+export const QUERY_FORMAT_DATE = 'YYYY-MM-DD HH:mm:ss.SSS';
+
 /**
  * Class of utilities
  */
 export class Utils {
+  static getLogFiltered(logs:LoggerageObject[], query:Query){
+    if(!logs || !query || !logs.length) return logs;
+
+    logs = logs.filter((log) => {
+      let ok = true;
+
+      if(query.from)
+        ok = moment(log.timestamp).isSameOrAfter(query.from);
+      if(ok && query.to)
+        ok = moment(log.timestamp).isSameOrBefore(query.to);
+      if(ok && query.app) ok = log.app === query.app;
+      if(ok && query.version) ok = log.version === query.version;
+      if(ok && query.level && query.level instanceof Array) {
+        ok = includes(query.level, log.level_number);
+      }else if(ok && query.level){
+        ok = log.level_number === query.level;
+      }
+
+      return ok;
+    });
+
+    return logs;
+  }
+  /**
+   * Return unix timestamp (milliseconds) from any type of date
+   * @param  {moment.Moment|Date|string|number} date
+   * @param  {string}                           dateStringFormat Optional. If we want to indicate our format according to the formats of momentjs.
+   *                                                             By default 'YYYY-MM-DD HH:mm:ss.SSS'
+   * @return {number}                                            Unix timestamp (milliseconds)
+   */
+  static getUnixDate(date:moment.Moment|Date|string|number, dateStringFormat?:string): number {
+    if(date instanceof Date){
+      return date.getTime();
+    }else if(typeof date == typeof moment()){
+      return date.valueOf() as number;
+    }else if(typeof date == 'string'){
+      if(dateStringFormat){
+        return moment(date, dateStringFormat).valueOf() as number;
+      }else{
+        return moment(date, QUERY_FORMAT_DATE).valueOf() as number;
+      }
+    }
+    return date as number;
+  }
   /**
    * Build content for csv file
    * @param ar {Array}
    * @returns {string}
    */
-  static buildCsvContent(arr:Array<any>):string {
+  static buildCsvContent(arr:any[]):string {
     let contenido = '';
     if(!arr.length) return contenido;
     contenido += Object.keys(arr[0]).join(';') + '\n';
@@ -21,7 +73,7 @@ export class Utils {
    * @param ar {Array}
    * @returns {string}
    */
-  static buildTxtContent(arr:Array<any>):string {
+  static buildTxtContent(arr:any[]):string {
     let contenido = '';
     if(!arr.length) return contenido;
     contenido += Object.keys(arr[0]).join('\t') + '\n';

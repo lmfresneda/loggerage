@@ -25,12 +25,12 @@ export class LoggerageObject {
    */
   date:string;
   /**
-   * String level log, like INFO, ERROR...
+   * String level log, like INFO, ERROR, etc...
    * @type {string}
    */
   level:string;
   /**
-   * Number level log, like 3, 4..
+   * Number level log, like 3 for INFO, 4 for ERROR, etc..
    * @type {string}
    */
   level_number:number;
