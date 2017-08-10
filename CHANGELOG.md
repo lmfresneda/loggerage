@@ -1,3 +1,12 @@
+## [v2.2.0](https://github.com/lmfresneda/loggerage/releases/tag/2.2.0)
+
+* Added get log by query system ([issue #2](https://github.com/lmfresneda/loggerage/issues/2))
+* Added `version_number` to log object
+
+## v2.1.1
+
+* Correction doc in async error methods
+
 ## [v2.1.0](https://github.com/lmfresneda/loggerage/releases/tag/2.1.0)
 
 * Cache loggers ([issue #1](https://github.com/lmfresneda/loggerage/issues/1))
