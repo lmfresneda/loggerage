@@ -1,5 +1,10 @@
 ## Changelog
 
+### [v2.3.0](https://github.com/lmfresneda/loggerage/releases/tag/2.3.0)
+
+* Create doc page [http://lmfresneda.github.io/loggerage/](http://lmfresneda.github.io/loggerage/)
+* Improvement doc
+
 ### v2.2.1
 
 * Bug fixed. Query with one DEBUG level not filtered. ([issue #9](https://github.com/lmfresneda/loggerage/issues/9))
