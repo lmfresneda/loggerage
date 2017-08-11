@@ -1,3 +1,5 @@
+## Query System
+
 You can get the log by applying a filter. In the default localStorage, the log is return filtered by the query. In the custom storages, the query is passed in second parameter of `getItem` method, **only if a query is required**. Example of query:
 
 ```javascript
