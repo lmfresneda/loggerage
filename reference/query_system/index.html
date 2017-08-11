@@ -166,10 +166,14 @@
         <div class="col-md-3"><div class="bs-sidebar hidden-print affix well" role="complementary">
     <ul class="nav bs-sidenav">
     
+        <li class="first-level active"><a href="#query_system">Query System</a></li>
+        
+    
     </ul>
 </div></div>
         <div class="col-md-9" role="main">
 
+<h2 id="query_system">Query System</h2>
 <p>You can get the log by applying a filter. In the default localStorage, the log is return filtered by the query. In the custom storages, the query is passed in second parameter of <code>getItem</code> method, <strong>only if a query is required</strong>. Example of query:</p>
 <pre><code class="javascript">const { Loggerage, LoggerageLevel } = require(&quot;loggerage&quot;);
 
