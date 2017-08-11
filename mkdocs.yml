@@ -1,0 +1,26 @@
+site_name: loggerage
+site_url: https://loggerage.github.io
+repo_url: https://github.com/lmfresneda/loggerage
+site_description: loggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want
+site_author: Luis Miguel F. <https://lmfresneda.github.io>
+theme: cinder
+extra:
+    version: 2.1.1
+markdown_extensions:
+- toc:
+    separator: _
+- wikilinks:
+- markdown_checklist.extension:
+extra_css:
+  - css/extra.css
+
+pages:
+- "Home": index.md
+- "Reference":
+  - "Index Reference": reference/index_reference.md
+  - "Query System": reference/query_system.md
+  - "Stored loggers": reference/stored_loggers.md
+  - "Options": reference/options.md
+- "Contributing": contributing.md
+- "Changelog": changelog.md
+- "License": license.md
