@@ -1,0 +1,349 @@
+{
+    "docs": [
+        {
+            "location": "/",
+            "text": "loggerage\n\n\n \n \n \n \n\n\nloggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want. It also is able to create a .csv or .txt file with the log content.\n\n\nHow to use\n\n\n$ npm install --save loggerage\n\n\n\n\nconst { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");\n\n\n\n\nFirst parameter is the name to identify our application, it means it has to be unique for the logger. This construction will use the default 'localStorage'. \nSee constructor explanation\n for more options\n\n\nSo the logger gives back most of the methods, we can chain calls (chaining) in sync methods:\n\n\nlogger.\n    debug(\"Hello world!\").\n    info(\"Info message\").\n    debug(\"End\");\n\n\n\n\nReference\n\n\nYou have a complete reference on \nthis page\n\n\nAbout async methods\n\n\nAll async methods require a callback parameter that recive at first parameter an error if occurs, and in the second parameter recive data if is neccesary, like a log for example.\n\n\nlogger.getLogAsync((err, log) => {\n  if(null != err) return handleError(err);\n\n  console.log(log); // OK!\n});\n\n\n\n\nIMPORTANT\n: We recommend returning a promise in storage methods when we are going to work with asynchronous methods of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by \nPromise.resolve\n always.\n\n\nConvert async methods to Promises\n\n\nAll async methods are promisifables, this means that, with the help of libraries like \nes6-promisify\n or \npromisify-node\n, you can convert the methods to promises:\n\n\nconst promisify = require('promisify-node');\nconst { Loggerage } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.infoAsync = promisify(logger.infoAsync);\n\nlogger.infoAsync(\"Hello world!\").then(() => {\n  // OK!\n}).catch((err) => {\n  // KO\n});\n\n\n\n\nContributing\n\n\n\n\nSee contributing page\n\n\n\n\nLicense\n\n\n\n\nSee MIT License",
+            "title": "Home"
+        },
+        {
+            "location": "/#loggerage",
+            "text": "loggerage is a Javascript logger who saves the register directly on localStorage or your own storage if you want. It also is able to create a .csv or .txt file with the log content.",
+            "title": "loggerage"
+        },
+        {
+            "location": "/#how_to_use",
+            "text": "$ npm install --save loggerage  const { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");  First parameter is the name to identify our application, it means it has to be unique for the logger. This construction will use the default 'localStorage'.  See constructor explanation  for more options  So the logger gives back most of the methods, we can chain calls (chaining) in sync methods:  logger.\n    debug(\"Hello world!\").\n    info(\"Info message\").\n    debug(\"End\");",
+            "title": "How to use"
+        },
+        {
+            "location": "/#reference",
+            "text": "You have a complete reference on  this page",
+            "title": "Reference"
+        },
+        {
+            "location": "/#about_async_methods",
+            "text": "All async methods require a callback parameter that recive at first parameter an error if occurs, and in the second parameter recive data if is neccesary, like a log for example.  logger.getLogAsync((err, log) => {\n  if(null != err) return handleError(err);\n\n  console.log(log); // OK!\n});  IMPORTANT : We recommend returning a promise in storage methods when we are going to work with asynchronous methods of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by  Promise.resolve  always.",
+            "title": "About async methods"
+        },
+        {
+            "location": "/#convert_async_methods_to_promises",
+            "text": "All async methods are promisifables, this means that, with the help of libraries like  es6-promisify  or  promisify-node , you can convert the methods to promises:  const promisify = require('promisify-node');\nconst { Loggerage } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.infoAsync = promisify(logger.infoAsync);\n\nlogger.infoAsync(\"Hello world!\").then(() => {\n  // OK!\n}).catch((err) => {\n  // KO\n});",
+            "title": "Convert async methods to Promises"
+        },
+        {
+            "location": "/#contributing",
+            "text": "See contributing page",
+            "title": "Contributing"
+        },
+        {
+            "location": "/#license",
+            "text": "See MIT License",
+            "title": "License"
+        },
+        {
+            "location": "/reference/index_reference/",
+            "text": "Index Reference\n\n\nConstructor\n\n\nThis is the constructor interface:\n\n\nconstructor(app: string, options?: LoggerageOptions)\n\n\n\n\nThe \nfirst parameter\n is the \napp or logger name\n. The second parameter is optional, and is a \nLoggerageOptions\n object, which defines different options for logger (all properties of the options are optionals).\n\n\nconst { Loggerage, LoggerageLevel, LoggerageOptions } = require(\"loggerage\");\nconst myStorage = require('./my-storage');\n\nconst options = new LoggerageOptions();\noptions.version = '1.0';\noptions.defaultLogLevel = LoggerageLevel.INFO;\noptions.storage = myStorage;\nconst logger = new Loggerage(\"MY-APP\", options);\n\n\n\n\nLoggerageOptions\n is really a plain object, then, out of 'typescript' scope, you can do this:\n\n\nconst logger = new Loggerage(\"MY-APP\", {\n    version: '1.0',\n    defaultLogLevel: LoggerageLevel.INFO,\n    storage: myStorage\n});\n\n\n\n\n.setStorage (Change storage)\n\n\nDeclaration:\n\n\n.setStorage( storage: Storage ): Loggerage\n\n\n\n\nWe can indicate a different storage other than the default one. This new storage must implement the next interface:\n\n\n// file: 'src/storage-interface.ts'\n\ninterface Storage {\n  getItem(key:string, query?:Query): LoggerageObject[] | Promise<LoggerageObject[]>\n  setItem(key:string, value:LoggerageObject): void | Promise<void>\n  clear(): void | Promise<void>\n}\n\n// 'key' is the name of app or logger, indicated in constructor.\n// 'query' is optional.\n\n\n\n\nIt's similar to \nlocalStorage\n, but not working with strings in the return of \ngetItem\n and second parameter of \nsetItem\n.\n\n\nIMPORTANT\n: We recommend returning a promise when we are going to work with \nasynchronous methods\n of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by \nPromise.resolve\n always.\n\n\n.getVersion\n\n\nDeclaration:\n\n\n.getVersion( ): number|string\n\n\n\n\nReturns actual version\n\n\n.getApp\n\n\nDeclaration:\n\n\n.getApp( ): string\n\n\n\n\nReturns app or logger name given at the constructor\n\n\n.setDefaultLogLevel\n\n\nDeclaration:\n\n\n.setDefaultLogLevel( defaultLogLevel: LoggerageLevel ): Loggerage\n\n\n\n\nModifies log default level if we call \n.log()\n directly\n\n\n.getDefaultLogLevel\n\n\nDeclaration:\n\n\n.getDefaultLogLevel( ): string\n\n\n\n\nReturns current default log level string, like \nINFO\n\n\n.getDefaultLogLevelNumber\n\n\nDeclaration:\n\n\n.getDefaultLogLevelNumber( ): number\n\n\n\n\nReturns current default log level number, like \n3\n for \nINFO\n level\n\n\n.setSilence\n\n\nDeclaration:\n\n\n.setSilence( silence: boolean ): Loggerage\n\n\n\n\nSet silence console logs.\n\n\n.getSilence\n\n\nDeclaration:\n\n\n.getSilence( ): boole\n\n\n\n\nGet actual silence console logs.\n\n\n.getLog\n\n\nDeclaration:\n\n\n.getLog( ): LoggerageObject[]\n\n\n\n\nReturns the actual log saved at storage in an LoggerageObject Array, like this:\n\n\n// file: src/loggerage-object.ts\n\nLoggerageObject[] = [{\n    app: string,            // app or logger name\n    version: number|string, // app or logger version\n    timestamp: number,      // Created by Date.now()\n    date : \"string\",        // Creation date in Date.toLocaleString() format\n    level : \"string\",       // log level\n    level_number : number,  // log level number\n    message : \"string\"      // logged message\n}]\n\n\n\n\n.getLogAsync\n\n\nDeclaration:\n\n\n.getLogAsync( callback: (error: Error, data?: LoggerageObject[]) => void ): void\n\n\n\n\nReturns asynchronously the actual log saved at storage in an LoggerageObject Array, like the \n.getLog( )\n method.\n\n\n.clearLog\n\n\nDeclaration:\n\n\n.clearLog( ): Loggerage\n\n\n\n\nDelete all current log.\n\n\n.clearLogAsync\n\n\nDeclaration:\n\n\n.clearLogAsync( callback: (error: Error|void) => void ): void\n\n\n\n\nDelete all current log asynchronously\n\n\n.downloadFileLog\n\n\nDeclaration:\n\n\n.downloadFileLog( type: string = \"txt\" ) : Loggerage\n\n\n\n\nDownload current log file. We can indicate filetype with \n\"csv\"\n or \n\"txt\"\n parameters for .csv or .txt files. CSV files are separated by ';' and TXT files are separated by tabs\n\n\nName file format is:\n\n\n[ App name ]_[ Date.now() ]_log.[ type ]\n\n\nExample: \nMY-APP_1462995577596_log.txt\n\n\nINSERT LOG METHODS\n\n\n.info\n\n\nDeclaration:\n\n\n.info( message: string ): Loggerage\n\n\n\n\nLogs a message with INFO level\n\n\n.infoAsync\n\n\nDeclaration:\n\n\n.infoAsync( message: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with INFO level asynchronously\n\n\n.debug\n\n\nDeclaration:\n\n\n.debug( message: string ): Loggerage\n\n\n\n\nLogs a message with DEBUG level\n\n\n.debugAsync\n\n\nDeclaration:\n\n\n.debugAsync( message: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with DEBUG level asynchronously\n\n\n.trace\n\n\nDeclaration:\n\n\n.trace( message: string ): Loggerage\n\n\n\n\nLogs a message with TRACE level\n\n\n.traceAsync\n\n\nDeclaration:\n\n\n.traceAsync( message: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with TRACE level asynchronously\n\n\n.success\n\n\nDeclaration:\n\n\n.trace( message: string ): Loggerage\n\n\n\n\nLogs a message with SUCCESS level\n\n\n.successAsync\n\n\nDeclaration:\n\n\n.successAsync( message: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with SUCCESS level asynchronously\n\n\n.warn\n\n\nDeclaration:\n\n\n.warn( message: string ): Loggerage\n\n\n\n\nLogs a message with WARN level\n\n\n.warnAsync\n\n\nDeclaration:\n\n\n.warnAsync( message: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with WARN level asynchronously\n\n\n.error\n\n\nDeclaration:\n\n\n.error( message: string, stacktrace?:string ): Loggerage\n\n\n\n\nLogs a message with ERROR level. Concats \nstacktrace\n to message if stacktrace exists\n\n\n.errorAsync\n\n\nDeclaration:\n\n\n.errorAsync( message: string, stacktrace:string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with ERROR level asynchronously. Concats stacktrace to message. \nstacktrace\n is required.\n\n\n.failure\n\n\nDeclaration:\n\n\n.failure( message: string, stacktrace?:string ): Loggerage\n\n\n\n\nLogs a message with FAILURE level. Concats \nstacktrace\n to message if stacktrace exists\n\n\n.failureAsync\n\n\nDeclaration:\n\n\n.failureAsync( message: string, stacktrace:string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with FAILURE level. Concats stacktrace to message if \nstacktrace\n exists\n\n\n.log\n\n\nDeclaration:\n\n\n.log( logLevel: LoggerageLevel = defaultLogLevel, message: string, stacktrace?: string ): Loggerage\n\n\n\n\nLogs a message with given level. Concats stacktrace to message if \nstacktrace\n exists\n\n\n.logAsync\n\n\nDeclaration:\n\n\n.logAsync( logLevel: LoggerageLevel = defaultLogLevel, message: string, stacktrace: string, callback: (error: Error|void) => void ): void\n\n\n\n\nLogs a message with given level asynchronously. Concats stacktrace to message if \nstacktrace\n exists, which can be null.",
+            "title": "Index Reference"
+        },
+        {
+            "location": "/reference/index_reference/#index_reference",
+            "text": "",
+            "title": "Index Reference"
+        },
+        {
+            "location": "/reference/index_reference/#constructor",
+            "text": "This is the constructor interface:  constructor(app: string, options?: LoggerageOptions)  The  first parameter  is the  app or logger name . The second parameter is optional, and is a  LoggerageOptions  object, which defines different options for logger (all properties of the options are optionals).  const { Loggerage, LoggerageLevel, LoggerageOptions } = require(\"loggerage\");\nconst myStorage = require('./my-storage');\n\nconst options = new LoggerageOptions();\noptions.version = '1.0';\noptions.defaultLogLevel = LoggerageLevel.INFO;\noptions.storage = myStorage;\nconst logger = new Loggerage(\"MY-APP\", options);  LoggerageOptions  is really a plain object, then, out of 'typescript' scope, you can do this:  const logger = new Loggerage(\"MY-APP\", {\n    version: '1.0',\n    defaultLogLevel: LoggerageLevel.INFO,\n    storage: myStorage\n});",
+            "title": "Constructor"
+        },
+        {
+            "location": "/reference/index_reference/#setstorage_change_storage",
+            "text": "Declaration:  .setStorage( storage: Storage ): Loggerage  We can indicate a different storage other than the default one. This new storage must implement the next interface:  // file: 'src/storage-interface.ts'\n\ninterface Storage {\n  getItem(key:string, query?:Query): LoggerageObject[] | Promise<LoggerageObject[]>\n  setItem(key:string, value:LoggerageObject): void | Promise<void>\n  clear(): void | Promise<void>\n}\n\n// 'key' is the name of app or logger, indicated in constructor.\n// 'query' is optional.  It's similar to  localStorage , but not working with strings in the return of  getItem  and second parameter of  setItem .  IMPORTANT : We recommend returning a promise when we are going to work with  asynchronous methods  of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by  Promise.resolve  always.",
+            "title": ".setStorage (Change storage)"
+        },
+        {
+            "location": "/reference/index_reference/#getversion",
+            "text": "Declaration:  .getVersion( ): number|string  Returns actual version",
+            "title": ".getVersion"
+        },
+        {
+            "location": "/reference/index_reference/#getapp",
+            "text": "Declaration:  .getApp( ): string  Returns app or logger name given at the constructor",
+            "title": ".getApp"
+        },
+        {
+            "location": "/reference/index_reference/#setdefaultloglevel",
+            "text": "Declaration:  .setDefaultLogLevel( defaultLogLevel: LoggerageLevel ): Loggerage  Modifies log default level if we call  .log()  directly",
+            "title": ".setDefaultLogLevel"
+        },
+        {
+            "location": "/reference/index_reference/#getdefaultloglevel",
+            "text": "Declaration:  .getDefaultLogLevel( ): string  Returns current default log level string, like  INFO",
+            "title": ".getDefaultLogLevel"
+        },
+        {
+            "location": "/reference/index_reference/#getdefaultloglevelnumber",
+            "text": "Declaration:  .getDefaultLogLevelNumber( ): number  Returns current default log level number, like  3  for  INFO  level",
+            "title": ".getDefaultLogLevelNumber"
+        },
+        {
+            "location": "/reference/index_reference/#setsilence",
+            "text": "Declaration:  .setSilence( silence: boolean ): Loggerage  Set silence console logs.",
+            "title": ".setSilence"
+        },
+        {
+            "location": "/reference/index_reference/#getsilence",
+            "text": "Declaration:  .getSilence( ): boole  Get actual silence console logs.",
+            "title": ".getSilence"
+        },
+        {
+            "location": "/reference/index_reference/#getlog",
+            "text": "Declaration:  .getLog( ): LoggerageObject[]  Returns the actual log saved at storage in an LoggerageObject Array, like this:  // file: src/loggerage-object.ts\n\nLoggerageObject[] = [{\n    app: string,            // app or logger name\n    version: number|string, // app or logger version\n    timestamp: number,      // Created by Date.now()\n    date : \"string\",        // Creation date in Date.toLocaleString() format\n    level : \"string\",       // log level\n    level_number : number,  // log level number\n    message : \"string\"      // logged message\n}]",
+            "title": ".getLog"
+        },
+        {
+            "location": "/reference/index_reference/#getlogasync",
+            "text": "Declaration:  .getLogAsync( callback: (error: Error, data?: LoggerageObject[]) => void ): void  Returns asynchronously the actual log saved at storage in an LoggerageObject Array, like the  .getLog( )  method.",
+            "title": ".getLogAsync"
+        },
+        {
+            "location": "/reference/index_reference/#clearlog",
+            "text": "Declaration:  .clearLog( ): Loggerage  Delete all current log.",
+            "title": ".clearLog"
+        },
+        {
+            "location": "/reference/index_reference/#clearlogasync",
+            "text": "Declaration:  .clearLogAsync( callback: (error: Error|void) => void ): void  Delete all current log asynchronously",
+            "title": ".clearLogAsync"
+        },
+        {
+            "location": "/reference/index_reference/#downloadfilelog",
+            "text": "Declaration:  .downloadFileLog( type: string = \"txt\" ) : Loggerage  Download current log file. We can indicate filetype with  \"csv\"  or  \"txt\"  parameters for .csv or .txt files. CSV files are separated by ';' and TXT files are separated by tabs  Name file format is:  [ App name ]_[ Date.now() ]_log.[ type ]  Example:  MY-APP_1462995577596_log.txt",
+            "title": ".downloadFileLog"
+        },
+        {
+            "location": "/reference/index_reference/#insert_log_methods",
+            "text": "",
+            "title": "INSERT LOG METHODS"
+        },
+        {
+            "location": "/reference/index_reference/#info",
+            "text": "Declaration:  .info( message: string ): Loggerage  Logs a message with INFO level",
+            "title": ".info"
+        },
+        {
+            "location": "/reference/index_reference/#infoasync",
+            "text": "Declaration:  .infoAsync( message: string, callback: (error: Error|void) => void ): void  Logs a message with INFO level asynchronously",
+            "title": ".infoAsync"
+        },
+        {
+            "location": "/reference/index_reference/#debug",
+            "text": "Declaration:  .debug( message: string ): Loggerage  Logs a message with DEBUG level",
+            "title": ".debug"
+        },
+        {
+            "location": "/reference/index_reference/#debugasync",
+            "text": "Declaration:  .debugAsync( message: string, callback: (error: Error|void) => void ): void  Logs a message with DEBUG level asynchronously",
+            "title": ".debugAsync"
+        },
+        {
+            "location": "/reference/index_reference/#trace",
+            "text": "Declaration:  .trace( message: string ): Loggerage  Logs a message with TRACE level",
+            "title": ".trace"
+        },
+        {
+            "location": "/reference/index_reference/#traceasync",
+            "text": "Declaration:  .traceAsync( message: string, callback: (error: Error|void) => void ): void  Logs a message with TRACE level asynchronously",
+            "title": ".traceAsync"
+        },
+        {
+            "location": "/reference/index_reference/#success",
+            "text": "Declaration:  .trace( message: string ): Loggerage  Logs a message with SUCCESS level",
+            "title": ".success"
+        },
+        {
+            "location": "/reference/index_reference/#successasync",
+            "text": "Declaration:  .successAsync( message: string, callback: (error: Error|void) => void ): void  Logs a message with SUCCESS level asynchronously",
+            "title": ".successAsync"
+        },
+        {
+            "location": "/reference/index_reference/#warn",
+            "text": "Declaration:  .warn( message: string ): Loggerage  Logs a message with WARN level",
+            "title": ".warn"
+        },
+        {
+            "location": "/reference/index_reference/#warnasync",
+            "text": "Declaration:  .warnAsync( message: string, callback: (error: Error|void) => void ): void  Logs a message with WARN level asynchronously",
+            "title": ".warnAsync"
+        },
+        {
+            "location": "/reference/index_reference/#error",
+            "text": "Declaration:  .error( message: string, stacktrace?:string ): Loggerage  Logs a message with ERROR level. Concats  stacktrace  to message if stacktrace exists",
+            "title": ".error"
+        },
+        {
+            "location": "/reference/index_reference/#errorasync",
+            "text": "Declaration:  .errorAsync( message: string, stacktrace:string, callback: (error: Error|void) => void ): void  Logs a message with ERROR level asynchronously. Concats stacktrace to message.  stacktrace  is required.",
+            "title": ".errorAsync"
+        },
+        {
+            "location": "/reference/index_reference/#failure",
+            "text": "Declaration:  .failure( message: string, stacktrace?:string ): Loggerage  Logs a message with FAILURE level. Concats  stacktrace  to message if stacktrace exists",
+            "title": ".failure"
+        },
+        {
+            "location": "/reference/index_reference/#failureasync",
+            "text": "Declaration:  .failureAsync( message: string, stacktrace:string, callback: (error: Error|void) => void ): void  Logs a message with FAILURE level. Concats stacktrace to message if  stacktrace  exists",
+            "title": ".failureAsync"
+        },
+        {
+            "location": "/reference/index_reference/#log",
+            "text": "Declaration:  .log( logLevel: LoggerageLevel = defaultLogLevel, message: string, stacktrace?: string ): Loggerage  Logs a message with given level. Concats stacktrace to message if  stacktrace  exists",
+            "title": ".log"
+        },
+        {
+            "location": "/reference/index_reference/#logasync",
+            "text": "Declaration:  .logAsync( logLevel: LoggerageLevel = defaultLogLevel, message: string, stacktrace: string, callback: (error: Error|void) => void ): void  Logs a message with given level asynchronously. Concats stacktrace to message if  stacktrace  exists, which can be null.",
+            "title": ".logAsync"
+        },
+        {
+            "location": "/reference/query_system/",
+            "text": "You can get the log by applying a filter. In the default localStorage, the log is return filtered by the query. In the custom storages, the query is passed in second parameter of \ngetItem\n method, \nonly if a query is required\n. Example of query:\n\n\nconst { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.info('Info log');\nlogger.debug('Debug log');\nconst log = logger.level(LoggerageLevel.INFO).getLog();\n\n// log = [{ level: 'INFO', level_number: 3, message: 'Info log' ... }];\n\n\n\n\nThese query system also apply for the \ngetLogAsync\n method.\n\n\nQuery methods\n:\n\n\n\n\n.from( from: Moment|Date|string|number, dateStringFormat?: string )\n:\n\n\n.to( from: Moment|Date|string|number, dateStringFormat?: string )\n:\n\n\n\n\nFrom and To methods, receives one of \nMoment|Date|string|number\n type, and if the date is passed in \nstring\n type, we can provide a \nmoment\n format\n. The format by default for string dates is \nYYYY-MM-DD HH:mm:ss.SSS\n. Number is a unix timestamp (in \nmilliseconds\n)\n\n\n\n\n.version( version: number|string )\n:\n\n\n\n\nRecieve the version of app or logger. Remember that diferents loggers can be with the same name, but different version.\n\n\n\n\n.level( level: LoggerageLevel|LoggerageLevel[] )\n:\n\n\n\n\nRecieve one or some levels to filter.\n\n\n\n\n.app( app: string )\n:\n\n\n\n\nRecieve the app or logger name. It's mainly made for custom storages, because with the default localStorage, the log is filtered by app name always.\n\n\nComplete example\n:\n\n\nconst { Loggerage, LoggerageLevel, LoggerageOptions } = require(\"loggerage\");\n\nconst opt1 = new LoggerageOptions();\nopt1.version = '1.0';\nconst opt2 = new LoggerageOptions();\nopt2.version = '2.0';\n\nconst logger1 = new Loggerage(\"MY-APP\", opt1);\nconst logger2 = new Loggerage(\"MY-APP\", opt2);\n\nlogger1.info('Info log 1');   // LOGGER 1\nlogger1.info('Info log 2');   // LOGGER 1\nlogger1.debug('Debug log 1'); // LOGGER 1\n\n// after 5 seconds\n\nlogger1.debug('Debug log 2'); // LOGGER 1\nlogger2.info('Info log 2');   // LOGGER 2\nlogger2.debug('Debug log 3'); // LOGGER 2\n\nconst logs1 = logger1\n                .from(moment().subtract(6, 'seconds'))\n                .to(moment().subtract(4, 'seconds'))\n                .level(LoggerageLevel.INFO)\n                .version('1.0') // this is not necessary in this case, but don't care\n                .getLog();\n\n// [logs1] include only 'Info log 1' and 'Info log 2' logs\n\nlogger2.from(moment().subtract(2, 'second')).getLogAsync(function(err, logs2) {\n  // It's asynchronous just to see that it works with this method too\n\n  // [logs2] include only 'Debug log 2', 'Info log 2' and 'Debug log 3' logs\n  // include one log of 'logger1' because the two use the same app name, use the default localStorage and no is filtered by version\n});",
+            "title": "Query System"
+        },
+        {
+            "location": "/reference/stored_loggers/",
+            "text": "Stored Logger\n\n\nWhen we build a logger, it's saved in Loggerage cache and can be retrieved by \ngetLogger\n static method:\n\n\ngetLogger\n\n\nDeclaration:\n\n\n.getLogger( app: string ): Loggerage\n\n\n\n\nExample:\n\n\nconst { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");\n\n// and after\n\nconst logger = Loggerage.getLogger(\"MY-APP\");\nlogger.debug(\"Hello again world!\");\n\n\n\n\nEvery time we build a logger with the same name, the previous one is overwritten.\n\n\ndestroy\n\n\nIn addition, we can also destroy a stored logger by \ndestroy\n static method:\n\n\nDeclaration:\n\n\n.destroy( app: string ): void\n\n\n\n\nExample:\n\n\nconst { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");\n\nLoggerage.destroy(\"MY-APP\"); // <-- destroy logger\n\n// and after\n\nconst logger = Loggerage.getLogger(\"MY-APP\");\n// logger is null!",
+            "title": "Stored loggers"
+        },
+        {
+            "location": "/reference/stored_loggers/#stored_logger",
+            "text": "When we build a logger, it's saved in Loggerage cache and can be retrieved by  getLogger  static method:",
+            "title": "Stored Logger"
+        },
+        {
+            "location": "/reference/stored_loggers/#getlogger",
+            "text": "Declaration:  .getLogger( app: string ): Loggerage  Example:  const { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");\n\n// and after\n\nconst logger = Loggerage.getLogger(\"MY-APP\");\nlogger.debug(\"Hello again world!\");  Every time we build a logger with the same name, the previous one is overwritten.",
+            "title": "getLogger"
+        },
+        {
+            "location": "/reference/stored_loggers/#destroy",
+            "text": "In addition, we can also destroy a stored logger by  destroy  static method:  Declaration:  .destroy( app: string ): void  Example:  const { Loggerage, LoggerageLevel } = require(\"loggerage\");\n\nconst logger = new Loggerage(\"MY-APP\");\nlogger.debug(\"Hello world!\");\n\nLoggerage.destroy(\"MY-APP\"); // <-- destroy logger\n\n// and after\n\nconst logger = Loggerage.getLogger(\"MY-APP\");\n// logger is null!",
+            "title": "destroy"
+        },
+        {
+            "location": "/reference/options/",
+            "text": "LoggerageOptions\n\n\nThis is the options object for \nconstructor\n.\n\n\n// file: src/loggerage-options.ts\n\n\n\n\n(all properties of the options are optionals).\n\n\n\n\n\n\n\n\nProperty\n\n\nType\n\n\nDefault\n\n\nDescription\n\n\n\n\n\n\n\n\n\n\nisLocalStorage\n\n\nboolean\n\n\ntrue\n\n\nIndicate if storage is the default localStorage\n\n\n\n\n\n\nsilence\n\n\nboolean\n\n\nfalse\n\n\nIf true, will not be displayed console logs\n\n\n\n\n\n\nversion\n\n\nnumber or string\n\n\n1\n\n\nVersion logger/application\n\n\n\n\n\n\ndefaultLogLevel\n\n\nLoggerageLevel\n\n\nLoggerageLevel.DEBUG\n\n\nDefault level log\n\n\n\n\n\n\nstorage\n\n\nobject\n\n\nnull\n\n\nOur own storage, instead default localStorage. If set, \nisLocalStorage\n property set to false automatically\n\n\n\n\n\n\n\n\nLoggerageLevel\n\n\nThis is the enum util for indicate log level:\n\n\n// file: src/loggerage-level.ts\n\nenum LoggerageLevel {\n  DEBUG,\n  TRACE,\n  SUCCESS,\n  INFO,\n  WARN,\n  ERROR,\n  FAILURE\n}",
+            "title": "Options"
+        },
+        {
+            "location": "/reference/options/#loggerageoptions",
+            "text": "This is the options object for  constructor .  // file: src/loggerage-options.ts  (all properties of the options are optionals).     Property  Type  Default  Description      isLocalStorage  boolean  true  Indicate if storage is the default localStorage    silence  boolean  false  If true, will not be displayed console logs    version  number or string  1  Version logger/application    defaultLogLevel  LoggerageLevel  LoggerageLevel.DEBUG  Default level log    storage  object  null  Our own storage, instead default localStorage. If set,  isLocalStorage  property set to false automatically",
+            "title": "LoggerageOptions"
+        },
+        {
+            "location": "/reference/options/#loggeragelevel",
+            "text": "This is the enum util for indicate log level:  // file: src/loggerage-level.ts\n\nenum LoggerageLevel {\n  DEBUG,\n  TRACE,\n  SUCCESS,\n  INFO,\n  WARN,\n  ERROR,\n  FAILURE\n}",
+            "title": "LoggerageLevel"
+        },
+        {
+            "location": "/contributing/",
+            "text": "Contributing\n\n\nIf you want to contribute to coding, check this pending tasks:\n\n\n\n\n Implement async methods\n\n\n Implement object options in constructor, instead defaultLogLevel and version\n\n\n Save the loggers to offer them with a get methods, like \nLoggerage.getLogger('NAME_LOGGER')\n\n\n Implement get log by query system\n\n\n Implement getStreamLog method\n\n\n Implement method or property that promisify all async methods automatically\n\n\n Develop storages for different scenarios (like mysql, files log, etc)\n\n\n Allow multiple storage (appendStorage method, for example)\n\n\n Test, more test\n\n\n\n\nRun test\n\n\n$ npm install && npm test\n\n\n\n\nDocumentation\n\n\nThis doc is built thanks to \nMkDocs\n. For contributing in doc, you must install \nmkdocs (with python)\n and install \nmarkdown-checklist.extension\n also.\n\n\nInstructions\n\n\n\n\nClone the \nloggerage repository\n if you have not done it before:\n\n\n\n\n$ git clone https://github.com/lmfresneda/loggerage.git\n$ cd loggerage\n\n\n\n\n\n\nClone again but this time the 'gh-pages' branch in the 'site' folder\n\n\n\n\n$ git clone -b gh-pages --single-branch https://github.com/lmfresneda/loggerage.git ./site/\n\n\n\n\n\n\nYour project looks like this now:\n\n\n\n\n...\nsrc/\ndocs/\nsite/ <-- created by second clone\n...\npackage.json\n...\n\n\n\n\nIn \ndocs\n folder are the complete documentation in Markdown format, and this is where you will work. When you building de page with the command \nmkdocs build\n, a \nsite\n folder is updated.\n\n\n\n\nHappy doc!",
+            "title": "Contributing"
+        },
+        {
+            "location": "/contributing/#contributing",
+            "text": "If you want to contribute to coding, check this pending tasks:    Implement async methods   Implement object options in constructor, instead defaultLogLevel and version   Save the loggers to offer them with a get methods, like  Loggerage.getLogger('NAME_LOGGER')   Implement get log by query system   Implement getStreamLog method   Implement method or property that promisify all async methods automatically   Develop storages for different scenarios (like mysql, files log, etc)   Allow multiple storage (appendStorage method, for example)   Test, more test",
+            "title": "Contributing"
+        },
+        {
+            "location": "/contributing/#run_test",
+            "text": "$ npm install && npm test",
+            "title": "Run test"
+        },
+        {
+            "location": "/contributing/#documentation",
+            "text": "This doc is built thanks to  MkDocs . For contributing in doc, you must install  mkdocs (with python)  and install  markdown-checklist.extension  also.",
+            "title": "Documentation"
+        },
+        {
+            "location": "/contributing/#instructions",
+            "text": "Clone the  loggerage repository  if you have not done it before:   $ git clone https://github.com/lmfresneda/loggerage.git\n$ cd loggerage   Clone again but this time the 'gh-pages' branch in the 'site' folder   $ git clone -b gh-pages --single-branch https://github.com/lmfresneda/loggerage.git ./site/   Your project looks like this now:   ...\nsrc/\ndocs/\nsite/ <-- created by second clone\n...\npackage.json\n...  In  docs  folder are the complete documentation in Markdown format, and this is where you will work. When you building de page with the command  mkdocs build , a  site  folder is updated.   Happy doc!",
+            "title": "Instructions"
+        },
+        {
+            "location": "/changelog/",
+            "text": "Changelog\n\n\nv2.2.1\n\n\n\n\nBug fixed. Query with one DEBUG level not filtered. (\nissue #9\n)\n\n\n\n\nv2.2.0\n\n\n\n\nAdded get log by query system (\nissue #2\n)\n\n\nAdded \nversion_number\n to log object\n\n\n\n\nv2.1.1\n\n\n\n\nCorrection doc in async error methods\n\n\n\n\nv2.1.0\n\n\n\n\nCache loggers (\nissue #1\n)\n\n\n\n\nv2.0.0\n\n\n\n\nOld constructor is removed, only accept \nconstructor(app, options)\n\n\nSeparate classes in files\n\n\nSeparate types in files and other folder\n\n\nImprovement storage interface\n\n\nImprovement control types\n\n\nWrapped with 'Promise.resolve' calls in async methods\n\n\nNot compatible with previous versions\n\n\n\n\nv1.3.0\n\n\n\n\nInsert app name and version properties in each log\n\n\nAccepted version as number or string\n\n\nAccepted object at second parameter in constructor, instead defaultLogLevel and version. Although the old form is still accepted for retrocompatibility.\n\n\n\n\nSecond parameter = {\n    isLocalStorage: boolean;            // default true\n    silence: boolean = false;           // default false\n    version: number|string;             // default 1\n    defaultLogLevel: LoggerageLevel;    // default LoggerageLevel.DEBUG;\n    storage: any;                       // default null\n}\n\n\n\n\nExample:\n\n\nconst logger = new Loggerage('MY-APP', {\n    isLocalStorage: false,\n    silence: true,\n    version: '1.1'\n    defaultLogLevel: LoggerageLevel.INFO,\n    storage: myOwnStorage\n});\n\n\n\n\nAll properties are optionals and the object itself is optional. The default options will be collected.\n\n\nv1.2.0\n\n\n\n\nImplement async methods\n\n\n\n\nv1.1.1\n\n\n\n\nfixed if not exist window or default localStorage in construction\n\n\nadded timestamp property to LoggerageObject\n\n\n\n\nv1.0.1\n\n\n\n\nFixed bugs and improvement docs\n\n\n\n\nv1.0.0\n\n\n\n\nRefactor\n\n\nPackage name changed (old LogStorage.js)\n\n\n\n\nv0.2.3\n\n\n\n\nFirst published version",
+            "title": "Changelog"
+        },
+        {
+            "location": "/changelog/#changelog",
+            "text": "",
+            "title": "Changelog"
+        },
+        {
+            "location": "/changelog/#v221",
+            "text": "Bug fixed. Query with one DEBUG level not filtered. ( issue #9 )",
+            "title": "v2.2.1"
+        },
+        {
+            "location": "/changelog/#v220",
+            "text": "Added get log by query system ( issue #2 )  Added  version_number  to log object",
+            "title": "v2.2.0"
+        },
+        {
+            "location": "/changelog/#v211",
+            "text": "Correction doc in async error methods",
+            "title": "v2.1.1"
+        },
+        {
+            "location": "/changelog/#v210",
+            "text": "Cache loggers ( issue #1 )",
+            "title": "v2.1.0"
+        },
+        {
+            "location": "/changelog/#v200",
+            "text": "Old constructor is removed, only accept  constructor(app, options)  Separate classes in files  Separate types in files and other folder  Improvement storage interface  Improvement control types  Wrapped with 'Promise.resolve' calls in async methods  Not compatible with previous versions",
+            "title": "v2.0.0"
+        },
+        {
+            "location": "/changelog/#v130",
+            "text": "Insert app name and version properties in each log  Accepted version as number or string  Accepted object at second parameter in constructor, instead defaultLogLevel and version. Although the old form is still accepted for retrocompatibility.   Second parameter = {\n    isLocalStorage: boolean;            // default true\n    silence: boolean = false;           // default false\n    version: number|string;             // default 1\n    defaultLogLevel: LoggerageLevel;    // default LoggerageLevel.DEBUG;\n    storage: any;                       // default null\n}  Example:  const logger = new Loggerage('MY-APP', {\n    isLocalStorage: false,\n    silence: true,\n    version: '1.1'\n    defaultLogLevel: LoggerageLevel.INFO,\n    storage: myOwnStorage\n});  All properties are optionals and the object itself is optional. The default options will be collected.",
+            "title": "v1.3.0"
+        },
+        {
+            "location": "/changelog/#v120",
+            "text": "Implement async methods",
+            "title": "v1.2.0"
+        },
+        {
+            "location": "/changelog/#v111",
+            "text": "fixed if not exist window or default localStorage in construction  added timestamp property to LoggerageObject",
+            "title": "v1.1.1"
+        },
+        {
+            "location": "/changelog/#v101",
+            "text": "Fixed bugs and improvement docs",
+            "title": "v1.0.1"
+        },
+        {
+            "location": "/changelog/#v100",
+            "text": "Refactor  Package name changed (old LogStorage.js)",
+            "title": "v1.0.0"
+        },
+        {
+            "location": "/changelog/#v023",
+            "text": "First published version",
+            "title": "v0.2.3"
+        },
+        {
+            "location": "/license/",
+            "text": "License\n\n\nThe \nMIT License\n (MIT)\n\n\nCopyright (c) 2016-2017 loggerage contributors\n\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\n\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\n\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.",
+            "title": "License"
+        },
+        {
+            "location": "/license/#license",
+            "text": "The  MIT License  (MIT)  Copyright (c) 2016-2017 loggerage contributors  Permission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:  The above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.  THE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.",
+            "title": "License"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+a > code {
+  color: #008cba;
+}
+
+.bs-sidebar {
+  overflow-y: auto;
+  height: 100%;
+}
+
+.bs-sidebar > .bs-sidenav {
+  padding-bottom: 100px !important;
+}

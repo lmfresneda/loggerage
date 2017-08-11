@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    
+    <url>
+     <loc>https://loggerage.github.io/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+        
+    <url>
+     <loc>https://loggerage.github.io/reference/index_reference/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://loggerage.github.io/reference/query_system/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://loggerage.github.io/reference/stored_loggers/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    <url>
+     <loc>https://loggerage.github.io/reference/options/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+        
+    
+
+    
+    <url>
+     <loc>https://loggerage.github.io/contributing/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>https://loggerage.github.io/changelog/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>https://loggerage.github.io/license/</loc>
+     <lastmod>2017-08-11</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+</urlset>
