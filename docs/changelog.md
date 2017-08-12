@@ -1,6 +1,12 @@
 ## Changelog
 
-### [v2.3.0](https://github.com/lmfresneda/loggerage/releases/tag/2.3.0)
+### [v2.3.1](https://github.com/lmfresneda/loggerage/releases/tag/2.3.1)
+
+* Separate download methods and implement with applyMixins
+* Added more test
+
+
+### v2.3.0
 
 * Create doc page [http://lmfresneda.github.io/loggerage/](http://lmfresneda.github.io/loggerage/)
 * Improvement doc
