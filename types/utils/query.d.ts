@@ -29,18 +29,18 @@ export declare class Query {
 }
 export declare class Queriable {
     isQueryRequested: boolean;
-    protected getQueryRequest(): Query;
+    getQueryRequest(): Query;
     from(from: moment.Moment | Date | string | number, dateStringFormat?: string): Queriable;
     to(to: moment.Moment | Date | string | number, dateStringFormat?: string): Queriable;
     level(level: LoggerageLevel | LoggerageLevel[]): Queriable;
     app(app: string): Queriable;
     version(version: number | string): Queriable;
-    protected resetQuery(): Queriable;
-    private _fromFormatFilter;
-    private _fromFilter;
-    private _toFormatFilter;
-    private _toFilter;
-    private _levelFilter;
-    private _appFilter;
-    private _versionFilter;
+    resetQuery(): Queriable;
+    _fromFormatFilter: string;
+    _fromFilter: moment.Moment | Date | string | number;
+    _toFormatFilter: string;
+    _toFilter: moment.Moment | Date | string | number;
+    _levelFilter: LoggerageLevel | LoggerageLevel[];
+    _appFilter: string;
+    _versionFilter: number | string;
 }

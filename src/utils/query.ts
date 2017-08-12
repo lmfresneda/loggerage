@@ -34,7 +34,7 @@ export class Queriable {
 
   isQueryRequested:boolean = false;
 
-  protected getQueryRequest():Query{
+  getQueryRequest():Query{
     const query = new Query();
     if(this._fromFilter != null)
       query.from = Utils.getUnixDate(this._fromFilter, this._fromFormatFilter);
@@ -78,7 +78,7 @@ export class Queriable {
     return this;
   }
 
-  protected resetQuery():Queriable{
+  resetQuery():Queriable{
     if(this.isQueryRequested){
       this.isQueryRequested = false;
       this._fromFormatFilter = null;
@@ -92,11 +92,11 @@ export class Queriable {
     return this;
   }
 
-  private _fromFormatFilter:string;
-  private _fromFilter:moment.Moment|Date|string|number;
-  private _toFormatFilter:string;
-  private _toFilter:moment.Moment|Date|string|number;
-  private _levelFilter:LoggerageLevel|LoggerageLevel[];
-  private _appFilter:string;
-  private _versionFilter:number|string;
+  _fromFormatFilter:string;
+  _fromFilter:moment.Moment|Date|string|number;
+  _toFormatFilter:string;
+  _toFilter:moment.Moment|Date|string|number;
+  _levelFilter:LoggerageLevel|LoggerageLevel[];
+  _appFilter:string;
+  _versionFilter:number|string;
 }

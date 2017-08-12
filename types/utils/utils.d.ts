@@ -6,6 +6,7 @@ export declare const QUERY_FORMAT_DATE = "YYYY-MM-DD HH:mm:ss.SSS";
  * Class of utilities
  */
 export declare class Utils {
+    static applyMixins(derivedCtor: any, baseCtors: any[]): void;
     static getLogFiltered(logs: LoggerageObject[], query: Query): LoggerageObject[];
     /**
      * Return unix timestamp (milliseconds) from any type of date

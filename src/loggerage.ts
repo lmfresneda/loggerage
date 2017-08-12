@@ -9,7 +9,8 @@ import * as assign from 'object-assign';
 import * as moment from 'moment';
 import { Utils } from './utils/utils';
 import { WrapLocalStorage } from './utils/wrap-localstorage';
-import { Queriable } from './utils/query';
+import { Queriable, Query } from './utils/query';
+import { Downloadable } from './utils/download';
 import { LoggerageOptions } from './loggerage-options';
 import { LoggerageObject } from './loggerage-object';
 import { LoggerageLevel } from './loggerage-level';
@@ -24,7 +25,7 @@ declare var global: any;
 /**
  * Loggerage class
  */
-class Loggerage extends Queriable {
+class Loggerage implements Queriable, Downloadable {
 
   //========================//
   //      CONSTRUCTOR       //
@@ -36,7 +37,7 @@ class Loggerage extends Queriable {
    * @param rest   Optional parameters
    */
   constructor(app:string, options?:LoggerageOptions){
-    super();
+    // super();
     this._options = new LoggerageOptions();
 
     if(options) this._options = assign(this._options, options);
@@ -208,66 +209,6 @@ class Loggerage extends Queriable {
       this.resetQuery();
       callback(err);
     });
-  }
-
-  /**
-   * Download the log in a file
-   * @param type File type (csv || txt)
-   * @returns {Loggerage}
-   */
-  downloadFileLog(type:string = "txt"):Loggerage{
-    if(Blob && (window.URL || window["webkitURL"])) {
-      console.info("The file is building now");
-      let contenido = "";
-      switch (type.toLowerCase()) {
-        case "txt":
-          contenido = Utils.buildTxtContent(this.getLog());
-          break;
-        case "csv":
-          contenido = Utils.buildCsvContent(this.getLog());
-          break;
-      }
-      let blob = Utils.getBlob(contenido, type);
-      let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-      Utils.downloadBlob(blob, nameFile);
-    }else {
-      throw new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser.");
-    }
-    this.resetQuery();
-    return this;
-  }
-
-  /**
-   * Download the log in a file
-   * @param type     File type (csv || txt) txt by default
-   * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is blob.
-   * @returns {void}
-   */
-  downloadFileLogAsync(type:string = "txt", callback:(error:Error|void, blob?:Blob) => void):void{
-    if(Blob && (window.URL || window["webkitURL"])) {
-      console.info("The file is building now");
-      let contenido = "";
-      this.getLogAsync((err, logs) => {
-        if(err) return callback(err);
-
-        switch (type.toLowerCase()) {
-          case "txt":
-            contenido = Utils.buildTxtContent(logs);
-            break;
-          case "csv":
-            contenido = Utils.buildCsvContent(logs);
-            break;
-        }
-        let blob = Utils.getBlob(contenido, type);
-        let nameFile = this.getApp() + "_" + Date.now() + "_log." + type.toLowerCase();
-        Utils.downloadBlob(blob, nameFile);
-        this.resetQuery();
-        callback(null, blob);
-      })
-    }else {
-      this.resetQuery();
-      callback(new Error("Your browser does not support File APIs. Visit http://browsehappy.com for update or your official page browser."));
-    }
   }
 
   //========================//
@@ -500,6 +441,28 @@ class Loggerage extends Queriable {
     let logObj = new LoggerageObject(LoggerageLevel[logLevel], message, this._app, this._options.version);
     return logObj;
   }
+
+  // inheritance Queriable
+  isQueryRequested:boolean;
+  getQueryRequest: () => Query;
+  from: (from:moment.Moment|Date|string|number, dateStringFormat?:string) => Queriable;
+  to: (to:moment.Moment|Date|string|number, dateStringFormat?:string) => Queriable;
+  level: (level:LoggerageLevel|LoggerageLevel[]) => Queriable;
+  app: (app:string) => Queriable;
+  version: (version:number|string) => Queriable;
+  resetQuery: () => Queriable;
+  _fromFormatFilter:string;
+  _fromFilter:moment.Moment|Date|string|number;
+  _toFormatFilter:string;
+  _toFilter:moment.Moment|Date|string|number;
+  _levelFilter:LoggerageLevel|LoggerageLevel[];
+  _appFilter:string;
+  _versionFilter:number|string;
+  // inheritance Downloadable
+  downloadFileLog: (type:string) => Downloadable;
+  downloadFileLogAsync: (type:string, callback:(error:Error|void, blob?:Blob) => void) => void;
 }
+
+Utils.applyMixins(Loggerage, [Queriable, Downloadable]);
 
 export { Loggerage, LoggerageOptions, LoggerageObject, LoggerageLevel };

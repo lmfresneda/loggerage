@@ -77,13 +77,26 @@ describe("Utils", function() {
       moment(now).format('DD/MM/YYYY HH:mm'), 'DD/MM/YYYY HH:mm'
     )).to.be.equal(
       moment(moment(now).format('DD/MM/YYYY HH:mm'), 'DD/MM/YYYY HH:mm').valueOf());
+
+    expect(Utils.getUnixDate(
+      moment(now).format('YYYY-MM-DD HH:mm:ss.SSS')
+    )).to.be.equal(now);
   });
 
   it("# buildCsvContent()", function() {
+    const arr = [
+      { field1: 'value1', field2: 'value2' },
+      { field1: 'value11', field2: 'value22' }
+    ];
+
+    const txt = Utils.buildCsvContent(arr);
+
+    expect(txt).to.be.equal(
+      'field1;field2\nvalue1;value2\nvalue11;value22\n'
+    );
   });
 
   it("# buildCsvContent() with empty array", function() {
-
     const arr = [];
 
     const csv = Utils.buildCsvContent(arr);
@@ -92,7 +105,6 @@ describe("Utils", function() {
   });
 
   it("# buildTxtContent()", function() {
-
     const arr = [
       { field1: 'value1', field2: 'value2' },
       { field1: 'value11', field2: 'value22' }

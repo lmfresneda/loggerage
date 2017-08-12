@@ -10,6 +10,14 @@ export const QUERY_FORMAT_DATE = 'YYYY-MM-DD HH:mm:ss.SSS';
  * Class of utilities
  */
 export class Utils {
+  static applyMixins(derivedCtor: any, baseCtors: any[]) {
+    baseCtors.forEach(baseCtor => {
+        Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {
+            derivedCtor.prototype[name] = baseCtor.prototype[name];
+        });
+    });
+  }
+
   static getLogFiltered(logs:LoggerageObject[], query:Query){
     if(!logs || !query || !logs.length) return logs;
 

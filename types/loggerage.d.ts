@@ -1,4 +1,6 @@
-import { Queriable } from './utils/query';
+import * as moment from 'moment';
+import { Queriable, Query } from './utils/query';
+import { Downloadable } from './utils/download';
 import { LoggerageOptions } from './loggerage-options';
 import { LoggerageObject } from './loggerage-object';
 import { LoggerageLevel } from './loggerage-level';
@@ -6,7 +8,7 @@ import { Storage } from './storage-interface';
 /**
  * Loggerage class
  */
-declare class Loggerage extends Queriable {
+declare class Loggerage implements Queriable, Downloadable {
     /**
      * Constructor for Loggerage
      * @param app    App or Logger name
@@ -78,19 +80,6 @@ declare class Loggerage extends Queriable {
      * @returns {void}
      */
     clearLogAsync(callback: (error: Error | void) => void): void;
-    /**
-     * Download the log in a file
-     * @param type File type (csv || txt)
-     * @returns {Loggerage}
-     */
-    downloadFileLog(type?: string): Loggerage;
-    /**
-     * Download the log in a file
-     * @param type     File type (csv || txt) txt by default
-     * @param callback    Is a function that recived two params. The first param is an error if occurs, otherwise is null. The second param is blob.
-     * @returns {void}
-     */
-    downloadFileLogAsync(type: string, callback: (error: Error | void, blob?: Blob) => void): void;
     /**
      * Log a message of all levels
      * @param logLevel
@@ -238,5 +227,22 @@ declare class Loggerage extends Queriable {
      * @returns {LoggerageObject}
      */
     private _makeLoggerageObject(logLevel, message);
+    isQueryRequested: boolean;
+    getQueryRequest: () => Query;
+    from: (from: moment.Moment | Date | string | number, dateStringFormat?: string) => Queriable;
+    to: (to: moment.Moment | Date | string | number, dateStringFormat?: string) => Queriable;
+    level: (level: LoggerageLevel | LoggerageLevel[]) => Queriable;
+    app: (app: string) => Queriable;
+    version: (version: number | string) => Queriable;
+    resetQuery: () => Queriable;
+    _fromFormatFilter: string;
+    _fromFilter: moment.Moment | Date | string | number;
+    _toFormatFilter: string;
+    _toFilter: moment.Moment | Date | string | number;
+    _levelFilter: LoggerageLevel | LoggerageLevel[];
+    _appFilter: string;
+    _versionFilter: number | string;
+    downloadFileLog: (type: string) => Downloadable;
+    downloadFileLogAsync: (type: string, callback: (error: Error | void, blob?: Blob) => void) => void;
 }
 export { Loggerage, LoggerageOptions, LoggerageObject, LoggerageLevel };
