@@ -226,20 +226,24 @@ logger.debug(&quot;Hello world!&quot;);
 
 <p><strong>IMPORTANT</strong>: We recommend returning a promise in storage methods when we are going to work with asynchronous methods of Loggerage, but not is required. The calls to storage methods, inside async methods of Loggerage, are wrapped by <code>Promise.resolve</code> always.</p>
 <h3 id="convert_async_methods_to_promises">Convert async methods to Promises</h3>
-<p>All async methods are promisifables, this means that, with the help of libraries like <a href="https://www.npmjs.com/package/es6-promisify"><code>es6-promisify</code></a> or <a href="https://www.npmjs.com/package/promisify-node"><code>promisify-node</code></a>, you can convert the methods to promises:</p>
-<pre><code class="javascript">const promisify = require('promisify-node');
-const { Loggerage } = require(&quot;loggerage&quot;);
+<p>Now you can use the <a href="https://github.com/lmfresneda/loggerage-promisify"><code>loggerage-promisify</code></a> helper for promisify methods. You can promisify the methods with <code>Async</code> suffix or promisify <strong>all methods</strong>.</p>
+<p>Example:</p>
+<pre><code class="javascript">const { Loggerage } = require(&quot;loggerage&quot;);
+const promisify = require('loggerage-promisify')
 
-const logger = new Loggerage(&quot;MY-APP&quot;);
-logger.infoAsync = promisify(logger.infoAsync);
+const logger = promisify(new Loggerage(&quot;MY-APP&quot;));
 
-logger.infoAsync(&quot;Hello world!&quot;).then(() =&gt; {
-  // OK!
-}).catch((err) =&gt; {
-  // KO
-});
+logger.debug(&quot;Hello world!&quot;) // is a promise now!
+  .then(() =&gt; {
+    return logger.getLog();
+  })
+  .then((log) =&gt; {
+    // handle log!
+  })
+  .catch(handleError);
 </code></pre>
 
+<p>See <a href="https://github.com/lmfresneda/loggerage-promisify"><code>loggerage-promisify</code></a> for more information.</p>
 <h3 id="contributing">Contributing</h3>
 <ul>
 <li><a href="contributing/">See contributing page</a></li>
@@ -300,5 +304,5 @@ logger.infoAsync(&quot;Hello world!&quot;).then(() =&gt; {
 
 <!--
 MkDocs version : 0.16.3
-Build Date UTC : 2017-08-12 12:50:49
+Build Date UTC : 2017-08-13 22:27:58
 -->
