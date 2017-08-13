@@ -50,21 +50,27 @@ logger.getLogAsync((err, log) => {
 
 ### Convert async methods to Promises
 
-All async methods are promisifables, this means that, with the help of libraries like [`es6-promisify`](https://www.npmjs.com/package/es6-promisify) or [`promisify-node`](https://www.npmjs.com/package/promisify-node), you can convert the methods to promises:
+Now you can use the [`loggerage-promisify`](https://github.com/lmfresneda/loggerage-promisify) helper for promisify methods. You can promisify the methods with `Async` suffix or promisify all methods.
+
+Example:
 
 ```javascript
-const promisify = require('promisify-node');
 const { Loggerage } = require("loggerage");
+const promisify = require('loggerage-promisify')
 
-const logger = new Loggerage("MY-APP");
-logger.infoAsync = promisify(logger.infoAsync);
+const logger = promisify(new Loggerage("MY-APP"));
 
-logger.infoAsync("Hello world!").then(() => {
-  // OK!
-}).catch((err) => {
-  // KO
-});
+logger.debug("Hello world!") // is a promise now!
+  .then(() => {
+    return logger.getLog();
+  })
+  .then((log) => {
+    // handle log!
+  })
+  .catch(handleError);
 ```
+
+See [`loggerage-promisify`](https://github.com/lmfresneda/loggerage-promisify) for more information.
 
 ### Contributing
 
@@ -73,7 +79,3 @@ logger.infoAsync("Hello world!").then(() => {
 ### License
 
 * [See MIT License](http://lmfresneda.github.io/loggerage/license/)
-
-
-
-
