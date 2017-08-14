@@ -1,6 +1,6 @@
 {
   "name": "loggerage",
-  "version": "2.3.1",
+  "version": "2.3.2",
   "description": "loggerage is a logger for Javascript that save the registry directly in the localStorage (or your own Storage)",
   "author": "lmfresneda <loggerage@gmail.com>",
   "main": "./build/loggerage.js",
