@@ -6,8 +6,8 @@ If you want to contribute to coding, check this pending tasks:
 - [x] Implement object options in constructor, instead defaultLogLevel and version
 - [x] Save the loggers to offer them with a get methods, like `Loggerage.getLogger('NAME_LOGGER')`
 - [x] Implement get log by query system
+- [x] Implement method or property that promisify all async methods automatically (see [loggerage-promisify](https://github.com/lmfresneda/loggerage-promisify))
 - [ ] Implement getStreamLog method
-- [ ] Implement method or property that promisify all async methods automatically
 - [ ] Develop storages for different scenarios (like mysql, files log, etc)
 - [ ] Allow multiple storage (appendStorage method, for example)
 - [ ] Test, more test
